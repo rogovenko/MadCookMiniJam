@@ -90,7 +90,6 @@ public class Paper : Draggable
     // Метод для установки масштаба полки
     public void SetShelfScale()
     {
-        Debug.Log("Paper: SetShelfScale");
         if (rectTransform != null)
         {
             rectTransform.localScale = shelfScale;
@@ -100,7 +99,6 @@ public class Paper : Draggable
     // Метод для установки стандартного масштаба
     public void SetDefaultScale()
     {
-        Debug.Log("Paper: SetDefaultScale");
         if (rectTransform != null)
         {
             rectTransform.localScale = defaultScale;

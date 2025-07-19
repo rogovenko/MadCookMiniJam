@@ -9,6 +9,9 @@ public class GameManager : MonoBehaviour
     [Tooltip("Менеджер очереди")]
     public QueueManager queueManager;
     
+    [Tooltip("Таймер игры")]
+    public Timer gameTimer;
+    
     [Header("Настройки игры")]
     [Tooltip("Создать персонажа при старте игры")]
     [SerializeField] private bool createCharacterOnStart = true;
@@ -41,10 +44,27 @@ public class GameManager : MonoBehaviour
             }
         }
         
+        // Проверяем наличие Timer
+        if (gameTimer == null)
+        {
+            gameTimer = FindObjectOfType<Timer>();
+            if (gameTimer == null)
+            {
+                Debug.LogError("GameManager: Timer не найден на сцене!");
+                return;
+            }
+        }
+        
         // Подписываемся на событие готовности очереди
         if (queueManager != null)
         {
             queueManager.OnQueueReady += OnQueueReady;
+        }
+        
+        // Подписываемся на события таймера
+        if (gameTimer != null)
+        {
+            gameTimer.OnTimerFinished += OnGameTimerFinished;
         }
     }
     
@@ -56,6 +76,14 @@ public class GameManager : MonoBehaviour
         {
             CreateCharacter();
         }
+    }
+    
+    // Вызывается когда таймер истек
+    private void OnGameTimerFinished()
+    {
+        Debug.Log("GameManager: Время игры истекло!");
+        // Здесь можно добавить логику окончания игры
+        // Например, показать экран Game Over
     }
     
     // Создать персонажа при старте игры
@@ -72,6 +100,13 @@ public class GameManager : MonoBehaviour
                 if (character != null)
                 {
                     SetCurrentCharacter(character);
+                    
+                    // Запускаем таймер после создания первого персонажа
+                    if (gameTimer != null)
+                    {
+                        gameTimer.StartTimer();
+                        Debug.Log("GameManager: Таймер запущен!");
+                    }
                 }
             }
             else
@@ -124,12 +159,53 @@ public class GameManager : MonoBehaviour
         return currentCharacter;
     }
     
+    // Методы для работы с таймером
+    public void AddTimeToTimer(float seconds)
+    {
+        if (gameTimer != null)
+        {
+            gameTimer.AddTime(seconds);
+        }
+    }
+    
+    public void StopGameTimer()
+    {
+        if (gameTimer != null)
+        {
+            gameTimer.StopTimer();
+        }
+    }
+    
+    public void StartGameTimer()
+    {
+        if (gameTimer != null)
+        {
+            gameTimer.StartTimer();
+        }
+    }
+    
+    public float GetCurrentGameTime()
+    {
+        return gameTimer != null ? gameTimer.GetCurrentTime() : 0f;
+    }
+    
+    public bool IsGameTimeUp()
+    {
+        return gameTimer != null && gameTimer.IsTimeUp();
+    }
+    
     private void OnDestroy()
     {
         // Отписываемся от события при уничтожении объекта
         if (queueManager != null)
         {
             queueManager.OnQueueReady -= OnQueueReady;
+        }
+        
+        // Отписываемся от событий таймера
+        if (gameTimer != null)
+        {
+            gameTimer.OnTimerFinished -= OnGameTimerFinished;
         }
     }
 } 
