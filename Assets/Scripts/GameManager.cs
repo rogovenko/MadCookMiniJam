@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
@@ -21,6 +22,26 @@ public class GameManager : MonoBehaviour
     [Tooltip("Спавнер бумаг")]
     public PaperSpawner paperSpawner;
     
+    [Tooltip("Менеджер рецептов")]
+    public RecipeManager recipeManager;
+    
+    [Header("Рецепты уровня")]
+    [Tooltip("Рецепты, которые нужно выполнить на текущем уровне")]
+    public List<RecipeData> currentLevelRecipes = new List<RecipeData>();
+    
+    [Header("Настройки заказов")]
+    [Tooltip("Префаб заказа")]
+    public GameObject orderPrefab;
+    
+    [Tooltip("Canvas для размещения заказов")]
+    public Canvas orderCanvas;
+    
+    [Tooltip("Позиция спавна заказов")]
+    public Transform orderSpawnPosition;
+    
+    [Tooltip("Оффсет между заказами по оси X")]
+    public float orderOffsetX = 2f;
+    
     [Header("Настройки игры")]
     [Tooltip("Создать персонажа при старте игры")]
     [SerializeField] private bool createCharacterOnStart = true;
@@ -35,6 +56,13 @@ public class GameManager : MonoBehaviour
     [Header("Текущая бумажка")]
     [Tooltip("Текущая созданная бумажка")]
     [SerializeField] private GameObject currentPaper;
+    
+    [Header("Настройки очереди")]
+    [Tooltip("Начальная очередь персонажей")]
+    [SerializeField] private List<CharacterType> initialQueue = new List<CharacterType>();
+    
+    [Tooltip("Создать очередь при старте игры")]
+    [SerializeField] private bool createQueueOnStart = true;
     
     void Start()
     {
@@ -104,6 +132,17 @@ public class GameManager : MonoBehaviour
             }
         }
         
+        // Проверяем наличие RecipeManager
+        if (recipeManager == null)
+        {
+            recipeManager = FindObjectOfType<RecipeManager>();
+            if (recipeManager == null)
+            {
+                Debug.LogError("GameManager: RecipeManager не найден на сцене!");
+                return;
+            }
+        }
+        
         // Подписываемся на событие готовности очереди
         if (queueManager != null)
         {
@@ -115,6 +154,124 @@ public class GameManager : MonoBehaviour
         {
             gameTimer.OnTimerFinished += OnGameTimerFinished;
         }
+        
+        // Создаем очередь при старте
+        if (createQueueOnStart)
+        {
+            CreateQueue();
+            InitRecipes();
+        }
+    }
+    
+    // Создать очередь персонажей
+    public void CreateQueue()
+    {
+        if (queueManager != null)
+        {
+            queueManager.CreateQueue(initialQueue);
+            Debug.Log($"GameManager: Создана очередь с {initialQueue.Count} персонажами");
+        }
+        else
+        {
+            Debug.LogError("GameManager: QueueManager не назначен!");
+        }
+    }
+    
+    // Метод для инициализации рецептов - создает заказы для каждого рецепта
+    public void InitRecipes()
+    {
+        if (currentLevelRecipes == null || currentLevelRecipes.Count == 0)
+        {
+            Debug.LogWarning("GameManager: Список currentLevelRecipes пуст!");
+            return;
+        }
+        
+        // Проверяем необходимые компоненты
+        if (orderPrefab == null)
+        {
+            Debug.LogError("GameManager: orderPrefab не назначен! Нельзя создать заказы.");
+            return;
+        }
+        
+        if (orderCanvas == null)
+        {
+            Debug.LogError("GameManager: orderCanvas не назначен! Нельзя создать заказы.");
+            return;
+        }
+        
+        if (orderSpawnPosition == null)
+        {
+            Debug.LogError("GameManager: orderSpawnPosition не назначен! Нельзя создать заказы.");
+            return;
+        }
+        
+        foreach (RecipeData recipe in currentLevelRecipes)
+        {
+            if (recipe != null && !string.IsNullOrEmpty(recipe.recipeName))
+            {
+                // Создаем заказ с названием рецепта
+                CreateOrder(recipe.recipeName);
+                Debug.Log($"GameManager: Создан заказ для рецепта '{recipe.recipeName}'");
+            }
+        }
+        
+        Debug.Log($"GameManager: Инициализировано {currentLevelRecipes.Count} рецептов");
+    }
+    
+    // Вспомогательный метод для создания заказа
+    private void CreateOrder(string recipeName)
+    {
+        // Проверки уже выполнены в InitRecipes()
+        
+        // Вычисляем позицию для заказа с учетом оффсета
+        Vector3 spawnPosition = orderSpawnPosition.position;
+        
+        // Если это не первый заказ, добавляем оффсет
+        int orderIndex = GetCurrentOrderCount();
+        if (orderIndex > 0)
+        {
+            spawnPosition.x += orderIndex * orderOffsetX;
+        }
+        
+        // Конвертируем мировую позицию в локальную позицию Canvas
+        Vector2 localPosition = orderCanvas.transform.InverseTransformPoint(spawnPosition);
+        
+        // Создаем заказ как дочерний объект Canvas
+        GameObject orderObject = Instantiate(orderPrefab, orderCanvas.transform);
+        
+        // Устанавливаем позицию заказа
+        RectTransform orderRectTransform = orderObject.GetComponent<RectTransform>();
+        if (orderRectTransform != null)
+        {
+            // Используем локальную позицию Canvas
+            orderRectTransform.anchoredPosition = localPosition;
+        }
+        else
+        {
+            // Если нет RectTransform, используем обычную позицию
+            orderObject.transform.position = spawnPosition;
+        }
+        
+        // Настраиваем текст заказа (если есть компонент Order)
+        Order orderComponent = orderObject.GetComponent<Order>();
+        if (orderComponent != null)
+        {
+            orderComponent.SetOrderText(recipeName);
+        }
+        else
+        {
+            Debug.LogWarning($"GameManager: На созданном заказе отсутствует компонент Order!");
+        }
+        
+        Debug.Log($"GameManager: Создан заказ '{recipeName}' в Canvas");
+    }
+    
+    // Получить количество текущих заказов (для вычисления оффсета)
+    private int GetCurrentOrderCount()
+    {
+        // Ищем все объекты с компонентом Order на сцене
+        Order[] existingOrders = FindObjectsOfType<Order>();
+        return existingOrders.Length;
     }
     
     // Вызывается когда очередь готова

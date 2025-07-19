@@ -9,8 +9,7 @@ public class QueueManager : MonoBehaviour
     [SerializeField] private GameObject charShadowPrefab;
     [SerializeField] private float horizontalOffset = 100f;
     
-    [Header("Initial Queue")]
-    [SerializeField] private List<CharacterType> initialQueue = new List<CharacterType>();
+
     
     [Header("Character Sprites")]
     [SerializeField] private Sprite tomatoSprite;
@@ -26,11 +25,11 @@ public class QueueManager : MonoBehaviour
     // Событие, которое вызывается когда очередь готова
     public event Action OnQueueReady;
     
-    private void Start()
-    {
-        InitializeCharacterSprites();
-        CreateQueue(initialQueue);
-    }
+    // private void Start()
+    // {
+    //     InitializeCharacterSprites();
+    //     // Очередь теперь создается из GameManager
+    // }
     
     private void InitializeCharacterSprites()
     {
@@ -44,6 +43,7 @@ public class QueueManager : MonoBehaviour
     
     public void CreateQueue(List<CharacterType> characterTypes)
     {
+        InitializeCharacterSprites();
         ClearQueue();
         
         Vector2 currentPosition = (Vector2)transform.position;

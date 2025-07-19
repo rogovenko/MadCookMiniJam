@@ -1514,11 +1514,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1359003457033563717, guid: cbaaf86690fd68f49b7dc390b3d8b26d, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 264.1
+      value: 120
       objectReference: {fileID: 0}
     - target: {fileID: 1359003457033563717, guid: cbaaf86690fd68f49b7dc390b3d8b26d, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 70.7
+      value: -154
       objectReference: {fileID: 0}
     - target: {fileID: 1359003457033563717, guid: cbaaf86690fd68f49b7dc390b3d8b26d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -2785,6 +2785,9 @@ MonoBehaviour:
   createCharacterOnStart: 1
   chooseOrderMode: 0
   currentCharacter: {fileID: 0}
+  currentPaper: {fileID: 0}
+  initialQueue: 0000000001000000020000000300000004000000050000000000000002000000
+  createQueueOnStart: 1
 --- !u!4 &1631151478
 Transform:
   m_ObjectHideFlags: 0
@@ -3254,7 +3257,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   charShadowPrefab: {fileID: 3589493434239733745, guid: b2e1c3c2d5adf8f4b97f040a8144887b, type: 3}
   horizontalOffset: 100
-  initialQueue: 0000000003000000040000000000000000000000010000000200000005000000
   tomatoSprite: {fileID: 21300000, guid: e22af22ff827f0641b9a612bec59db0a, type: 3}
   onionSprite: {fileID: 21300000, guid: cbabbd18381af6244b97a19dc0288e8e, type: 3}
   potatoSprite: {fileID: 21300000, guid: cb398673ad4f6274394aa9cc7b56210c, type: 3}

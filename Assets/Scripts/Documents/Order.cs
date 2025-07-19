@@ -222,6 +222,23 @@ public class Order : Paper
         return maxStickers - GetActiveStickerCount();
     }
     
+    // Установить текст заказа
+    public void SetOrderText(string orderText)
+    {
+        // Ищем TextMeshPro компонент для отображения текста заказа
+        TextMeshProUGUI orderTextComponent = GetComponentInChildren<TextMeshProUGUI>();
+        
+        if (orderTextComponent != null)
+        {
+            orderTextComponent.text = orderText;
+            Debug.Log($"Order: Установлен текст заказа: {orderText}");
+        }
+        else
+        {
+            Debug.LogWarning("Order: Не найден TextMeshProUGUI компонент для отображения текста заказа!");
+        }
+    }
+    
     // Обработчик клика по заказу
     public void OnOrderClick()
     {
