@@ -17,6 +17,17 @@ public enum CharacterShape
     Long
 }
 
+public enum CharacterDefect
+{
+    None,
+    Bite,
+    Bruise,
+    Mold,
+    Parasites,
+    Rot,
+    Spot
+}
+
 [System.Serializable]
 public class CharacterSpriteData
 {
@@ -53,6 +64,19 @@ public class ClothesSpriteData
     public List<Sprite> clothesSprites = new List<Sprite>();
 }
 
+[System.Serializable]
+public class DefectSpriteData
+{
+    [Tooltip("Тип дефекта")]
+    public CharacterDefect defectType;
+    
+    [Tooltip("Форма персонажа")]
+    public CharacterShape characterShape;
+    
+    [Tooltip("Спрайт дефекта")]
+    public Sprite defectSprite;
+}
+
 public class CharManager : MonoBehaviour
 {
     [Header("Настройки менеджера персонажей")]
@@ -76,6 +100,10 @@ public class CharManager : MonoBehaviour
     [Header("Спрайты одежды")]
     [Tooltip("Список спрайтов одежды для каждой формы")]
     [SerializeField] private List<ClothesSpriteData> clothesSprites = new List<ClothesSpriteData>();
+    
+    [Header("Спрайты дефектов")]
+    [Tooltip("Список спрайтов дефектов")]
+    [SerializeField] private List<DefectSpriteData> defectSprites = new List<DefectSpriteData>();
     
     void Start()
     {
@@ -191,6 +219,10 @@ public class CharManager : MonoBehaviour
                 {
                     characterComponent.SetClothesSprite(randomClothes);
                 }
+                
+                // Случайно выбираем дефект для данной формы
+                CharacterDefect randomDefect = GetRandomDefectForShape(spriteData.characterShape);
+                characterComponent.ApplyDefect(randomDefect, spriteData.characterShape);
             }
             else
             {
@@ -227,6 +259,45 @@ public class CharManager : MonoBehaviour
             return clothesData.clothesSprites[randomIndex];
         }
         return null;
+    }
+    
+    // Получить случайный дефект для формы
+    private CharacterDefect GetRandomDefectForShape(CharacterShape shape)
+    {
+        // Создаем массив всех возможных дефектов (включая None)
+        CharacterDefect[] allDefects = {
+            CharacterDefect.None,
+            CharacterDefect.Bite,
+            CharacterDefect.Bruise,
+            CharacterDefect.Mold,
+            CharacterDefect.Parasites,
+            CharacterDefect.Rot,
+            CharacterDefect.Spot
+        };
+        
+        // Выбираем случайный дефект
+        int randomIndex = Random.Range(0, allDefects.Length);
+        return allDefects[randomIndex];
+    }
+    
+    // Получить спрайт дефекта для формы
+    public Sprite GetDefectSprite(CharacterDefect defectType, CharacterShape shape)
+    {
+        if (defectType == CharacterDefect.None)
+        {
+            return null; // Нет дефекта
+        }
+        
+        DefectSpriteData defectData = defectSprites.Find(d => 
+            d.defectType == defectType && d.characterShape == shape);
+        return defectData?.defectSprite;
+    }
+    
+    // Получить спрайт дефекта (для обратной совместимости)
+    public Sprite GetDefectSprite(CharacterDefect defectType)
+    {
+        // По умолчанию используем Round форму
+        return GetDefectSprite(defectType, CharacterShape.Round);
     }
     
     // Получить спрайт тела для типа персонажа

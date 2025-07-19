@@ -12,6 +12,9 @@ public class Character : MonoBehaviour
     
     [Tooltip("Кастомное название персонажа")]
     [SerializeField] private string customCharacterName = "";
+    
+    [Tooltip("Текущий дефект персонажа")]
+    [SerializeField] private CharacterDefect currentDefect = CharacterDefect.None;
 
     [Header("Компоненты")]
     [Tooltip("Image компонент для отображения тела персонажа")]
@@ -22,6 +25,9 @@ public class Character : MonoBehaviour
     
     [Tooltip("Image компонент для отображения одежды")]
     [SerializeField] private Image clothesImage;
+    
+    [Tooltip("Image компонент для отображения дефектов")]
+    [SerializeField] private Image defectImage;
 
     void Start()
     {
@@ -40,6 +46,11 @@ public class Character : MonoBehaviour
         if (clothesImage == null)
         {
             clothesImage = transform.Find("Clothes")?.GetComponent<Image>();
+        }
+        
+        if (defectImage == null)
+        {
+            defectImage = transform.Find("Defect")?.GetComponent<Image>();
         }
     }
 
@@ -111,6 +122,58 @@ public class Character : MonoBehaviour
             Debug.LogError($"Character: Спрайт одежды для {characterType} не назначен!");
         }
     }
+    
+    // Применить дефект к персонажу
+    public void ApplyDefect(CharacterDefect defect)
+    {
+        ApplyDefect(defect, characterShape);
+    }
+    
+    // Применить дефект к персонажу с указанием формы
+    public void ApplyDefect(CharacterDefect defect, CharacterShape shape)
+    {
+        currentDefect = defect;
+        
+        if (defectImage == null)
+        {
+            Debug.LogError($"Character: Defect Image компонент не найден на {gameObject.name}!");
+            return;
+        }
+        
+        if (defect == CharacterDefect.None)
+        {
+            // Скрываем компонент дефекта
+            defectImage.gameObject.SetActive(false);
+            Debug.Log($"Character: Дефект убран с {gameObject.name}");
+        }
+        else
+        {
+            // Показываем компонент дефекта
+            defectImage.gameObject.SetActive(true);
+            
+            // Получаем спрайт дефекта из CharManager с учетом формы
+            CharManager charManager = FindObjectOfType<CharManager>();
+            if (charManager != null)
+            {
+                Sprite defectSprite = charManager.GetDefectSprite(defect, shape);
+                if (defectSprite != null)
+                {
+                    defectImage.sprite = defectSprite;
+                    Debug.Log($"Character: Применен дефект {defect} (форма: {shape}) к {gameObject.name}");
+                }
+                else
+                {
+                    Debug.LogWarning($"Character: Спрайт для дефекта {defect} (форма: {shape}) не найден!");
+                    defectImage.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                Debug.LogError("Character: CharManager не найден в сцене!");
+                defectImage.gameObject.SetActive(false);
+            }
+        }
+    }
 
     // Получить текущий тип персонажа
     public CharacterType GetCharacterType()
@@ -122,6 +185,12 @@ public class Character : MonoBehaviour
     public CharacterShape GetCharacterShape()
     {
         return characterShape;
+    }
+    
+    // Получить текущий дефект персонажа
+    public CharacterDefect GetCurrentDefect()
+    {
+        return currentDefect;
     }
 
     // Получить имя персонажа
