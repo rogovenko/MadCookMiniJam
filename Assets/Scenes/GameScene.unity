@@ -2724,8 +2724,8 @@ MonoBehaviour:
   onionSprite: {fileID: 21300000, guid: cbabbd18381af6244b97a19dc0288e8e, type: 3}
   potatoSprite: {fileID: 21300000, guid: cb398673ad4f6274394aa9cc7b56210c, type: 3}
   cucumberSprite: {fileID: 21300000, guid: ad542011c07058640a19d7b9fd6e0528, type: 3}
-  eggplantSprite: {fileID: 21300000, guid: ff74e6bb46d737d459bf71dbc7e5ac61, type: 3}
-  carrotSprite: {fileID: 21300000, guid: be57c5b9581953b4386f9d93b961ab0c, type: 3}
+  eggplantSprite: {fileID: 21300000, guid: bf9bec9c854b1834cbf5fc08ec03e990, type: 3}
+  carrotSprite: {fileID: 21300000, guid: e7d7ba5d94a2cea4ba3db4fb679e650a, type: 3}
 --- !u!224 &1998771137
 RectTransform:
   m_ObjectHideFlags: 0
