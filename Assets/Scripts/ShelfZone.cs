@@ -195,6 +195,102 @@ public class ShelfZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         }
     }
     
+    // Обработка drop объекта в зону полки
+    public void HandleDrop(Draggable draggable)
+    {
+        Paper paper = draggable.GetComponent<Paper>();
+        if (paper != null)
+        {
+
+            Debug.Log("ShelfZone: Размещаем объект на полке");
+            PlaceOnShelf(draggable);
+
+        }
+    }
+    
+    // Уничтожение Order
+    private void DestroyOrder(Order order)
+    {
+        // Отключаем возможность перетаскивания
+        Draggable draggable = order.GetComponent<Draggable>();
+        if (draggable != null)
+        {
+            draggable.enabled = false;
+        }
+        
+        // Запускаем корутину для плавного исчезновения
+        StartCoroutine(DestroyOrderCoroutine(order));
+    }
+    
+    private System.Collections.IEnumerator DestroyOrderCoroutine(Order order)
+    {
+        RectTransform orderRect = order.GetComponent<RectTransform>();
+        CanvasGroup orderCanvasGroup = order.GetComponent<CanvasGroup>();
+        
+        if (orderCanvasGroup == null)
+        {
+            orderCanvasGroup = order.gameObject.AddComponent<CanvasGroup>();
+        }
+        
+        Vector3 originalScale = orderRect.localScale;
+        float originalAlpha = orderCanvasGroup.alpha;
+        float elapsedTime = 0f;
+        float destroySpeed = 2f;
+        
+        // Плавно уменьшаем размер и прозрачность
+        while (elapsedTime < 1f)
+        {
+            elapsedTime += Time.deltaTime * destroySpeed;
+            float progress = Mathf.Clamp01(elapsedTime);
+            
+            // Уменьшаем размер
+            orderRect.localScale = Vector3.Lerp(originalScale, Vector3.zero, progress);
+            
+            // Уменьшаем прозрачность
+            orderCanvasGroup.alpha = Mathf.Lerp(originalAlpha, 0f, progress);
+            
+            yield return null;
+        }
+        
+        // Уничтожаем объект
+        Destroy(order.gameObject);
+    }
+    
+    // Размещение объекта на полке
+    private void PlaceOnShelf(Draggable draggable)
+    {
+        if (draggable != null)
+        {
+            // Устанавливаем масштаб полки
+            Paper paper = draggable.GetComponent<Paper>();
+            if (paper != null)
+            {
+                paper.SnapToCursorAndScale(paper.shelfScale);
+            }
+            
+            Debug.Log($"ShelfZone: Объект {draggable.name} размещен на полке");
+        }
+    }
+    
+    // Возврат объекта на полку (для случаев возврата из других зон)
+    private void ReturnToShelfPosition(Draggable draggable)
+    {
+        if (draggable != null)
+        {
+            // Возвращаем в исходную позицию
+            draggable.ReturnToOriginalPosition();
+            
+            // Устанавливаем масштаб полки
+            Paper paper = draggable.GetComponent<Paper>();
+            if (paper != null)
+            {
+                paper.SnapToCursorAndScale(paper.shelfScale);
+            }
+            
+            Debug.Log($"ShelfZone: Объект {draggable.name} возвращен на полку");
+        }
+    }
+    
     // Метод для получения информации о зоне
     public string GetZoneInfo()
     {

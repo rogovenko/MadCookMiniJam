@@ -108,12 +108,20 @@ public class DragEventSystem : MonoBehaviour
         OnDragEnd.Invoke(draggable);
         DeactivateAllZones();
 
-        // Если объект был над зоной, вызываем HandleDrop
+        // Если объект был над SendZone, вызываем HandleDrop
         if (currentZoneUnderDraggedObject != null)
         {
             currentZoneUnderDraggedObject.HandleDrop(draggable);
             currentZoneUnderDraggedObject = null;
         }
+        
+        // Если объект был над ShelfZone, вызываем HandleDrop
+        if (currentShelfZoneUnderDraggedObject != null)
+        {
+            currentShelfZoneUnderDraggedObject.HandleDrop(draggable);
+            currentShelfZoneUnderDraggedObject = null;
+        }
+        
         currentDraggedObject = null;
     }
 

@@ -155,61 +155,34 @@ public class SendZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         Paper paper = draggable.GetComponent<Paper>();
         if (paper != null)
         {
-            DestroyPaper(paper);
+            // Проверяем, является ли это Order
+            Order order = paper.GetComponent<Order>();
+            if (order != null)
+            {
+                // Если это Order - размещаем его в SendZone
+                Debug.Log("SendZone: Размещаем Order в SendZone");
+                CompleteOrder(order);
+            }
+            else
+            {
+                // Если это не Order - проверяем, откуда был взят объект
+                if (WasObjectFromShelfZone(draggable))
+                {
+                    // Если объект был взят из ShelfZone - возвращаем его туда
+                    Debug.Log("SendZone: Возвращаем объект обратно в ShelfZone");
+                    ReturnToShelfZone(draggable);
+                }
+                else
+                {
+                    // Если объект был взят из другого места - возвращаем в исходную позицию
+                    Debug.Log("SendZone: Возвращаем объект в исходную позицию");
+                    ReturnToOriginalPosition(draggable);
+                }
+            }
         }
     }
     
-    public void DestroyPaper(Paper paper)
-    {
-        // Отключаем возможность перетаскивания
-        Draggable draggable = paper.GetComponent<Draggable>();
-        if (draggable != null)
-        {
-            draggable.enabled = false;
-        }
-        
-        // Запускаем корутину для плавного исчезновения
-        StartCoroutine(DestroyPaperCoroutine(paper));
-        
-        // Воспроизводим звук (если есть)
-        if (destroySound != null)
-        {
-            AudioSource.PlayClipAtPoint(destroySound, Camera.main.transform.position);
-        }
-    }
-    
-    private System.Collections.IEnumerator DestroyPaperCoroutine(Paper paper)
-    {
-        RectTransform paperRect = paper.GetComponent<RectTransform>();
-        CanvasGroup paperCanvasGroup = paper.GetComponent<CanvasGroup>();
-        
-        if (paperCanvasGroup == null)
-        {
-            paperCanvasGroup = paper.gameObject.AddComponent<CanvasGroup>();
-        }
-        
-        Vector3 originalScale = paperRect.localScale;
-        float originalAlpha = paperCanvasGroup.alpha;
-        float elapsedTime = 0f;
-        
-        // Плавно уменьшаем размер и прозрачность
-        while (elapsedTime < 1f)
-        {
-            elapsedTime += Time.deltaTime * destroySpeed;
-            float progress = Mathf.Clamp01(elapsedTime);
-            
-            // Уменьшаем размер
-            paperRect.localScale = Vector3.Lerp(originalScale, Vector3.zero, progress);
-            
-            // Уменьшаем прозрачность
-            paperCanvasGroup.alpha = Mathf.Lerp(originalAlpha, 0f, progress);
-            
-            yield return null;
-        }
-        
-        // Уничтожаем объект
-        Destroy(paper.gameObject);
-    }
+
     
     // Метод для проверки, находится ли объект в зоне
     public bool IsObjectInZone(GameObject obj)
@@ -239,6 +212,81 @@ public class SendZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void SetZoneActive(bool active)
     {
         isZoneActive = active;
+    }
+    
+    // Проверяем, был ли объект взят из ShelfZone
+    private bool WasObjectFromShelfZone(Draggable draggable)
+    {
+        if (draggable == null) return false;
+        
+        // Используем встроенную проверку из Draggable
+        return draggable.WasOnShelfAtDragStart();
+    }
+    
+    // Размещение Order в SendZone
+    private void CompleteOrder(Order order)
+    {
+        if (order != null)
+        {
+            RectTransform orderRect = order.GetComponent<RectTransform>();
+            RectTransform sendZoneRect = GetComponent<RectTransform>();
+            
+            if (orderRect != null && sendZoneRect != null)
+            {
+                // Устанавливаем позицию Order в позицию SendZone
+                orderRect.localPosition = sendZoneRect.localPosition;
+                
+                // Устанавливаем масштаб 1,1,1
+                orderRect.localScale = Vector3.one;
+                
+                // Устанавливаем угол поворота 0
+                orderRect.localRotation = Quaternion.identity;
+                
+                // Отключаем возможность перетаскивания
+                Draggable draggable = order.GetComponent<Draggable>();
+                if (draggable != null)
+                {
+                    draggable.enabled = false;
+                }
+                
+                Debug.Log($"SendZone: Order {order.name} размещен в SendZone с нормальным масштабом и углом");
+            }
+        }
+    }
+    
+    // Возврат объекта в ShelfZone
+    private void ReturnToShelfZone(Draggable draggable)
+    {
+        if (draggable != null)
+        {
+            // Возвращаем в позицию начала перетаскивания
+            draggable.ReturnToDragStartPosition();
+            
+            // Устанавливаем масштаб полки (так как объект был на полке)
+            Paper paper = draggable.GetComponent<Paper>();
+            if (paper != null)
+            {
+                paper.SnapToCursorAndScale(paper.shelfScale);
+            }
+            
+            Debug.Log($"SendZone: Объект {draggable.name} возвращен в ShelfZone с масштабом полки");
+        }
+    }
+    
+    // Метод для возврата объекта в позицию начала перетаскивания
+    private void ReturnToOriginalPosition(Draggable draggable)
+    {
+        if (draggable != null)
+        {
+            // Возвращаем в позицию и масштаб начала перетаскивания
+            draggable.ReturnToDragStartPosition();
+            
+            // Воспроизводим звук возврата (если есть)
+            if (destroySound != null)
+            {
+                AudioSource.PlayClipAtPoint(destroySound, Camera.main.transform.position);
+            }
+        }
     }
     
     // Метод для получения статистики зоны

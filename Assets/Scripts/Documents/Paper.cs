@@ -140,6 +140,7 @@ public class Paper : Draggable
     // Уменьшить бумагу и центрировать под курсором, обновить offset для drag
     public void SnapToCursorAndScale(Vector3 newScale)
     {
+        Debug.Log("Paper: SnapToCursorAndScale");
         if (rectTransform == null) return;
         RectTransform parentRect = rectTransform.parent as RectTransform;
         if (parentRect == null) return;
