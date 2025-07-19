@@ -12,5 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9341055b93c4714c92c9828c83d3de1, type: 3}
   m_Name: EggplantOnion
   m_EditorClassIdentifier: 
-  recipeName: "\u041D\u043E\u0432\u044B\u0439 \u0440\u0435\u0446\u0435\u043F\u0442"
-  ingredients: []
+  recipeName: Eggplant & Onion Duo
+  ingredients:
+  - ingredientType: 4
+    amount: 2
+  - ingredientType: 1
+    amount: 2
