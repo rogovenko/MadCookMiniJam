@@ -45,7 +45,6 @@ public class Book : Paper
         if (pages == null || pages.Count == 0) return;
         currentPage = Mathf.Clamp(pageIndex, 0, pages.Count - 1);
         if (paperText != null)
-            Debug.Log(pages[currentPage].text);
             paperText.text = pages[currentPage].text;
         if (pageBackground != null)
             pageBackground.sprite = pages[currentPage].background;

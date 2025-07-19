@@ -83,7 +83,6 @@ public class DragEventSystem : MonoBehaviour
     {
         currentDraggedObject = draggable;
         OnDragStart.Invoke(draggable);
-        Debug.Log($"Начато перетаскивание: {draggable.name}");
         ActivateAllZones();
     }
     
@@ -91,7 +90,6 @@ public class DragEventSystem : MonoBehaviour
     {
         currentShelfZoneUnderDraggedObject = zone;
         OnEnterShelfZone.Invoke(draggable, zone);
-        Debug.Log($"Объект {draggable.name} вошел в полку {zone.name}");
     }
 
     public void NotifyExitShelfZone(Draggable draggable, ShelfZone zone)
@@ -99,13 +97,11 @@ public class DragEventSystem : MonoBehaviour
         if (currentShelfZoneUnderDraggedObject == zone)
             currentShelfZoneUnderDraggedObject = null;
         OnExitShelfZone.Invoke(draggable, zone);
-        Debug.Log($"Объект {draggable.name} вышел из полки {zone.name}");
     }
 
     public void NotifyDragEnd(Draggable draggable)
     {
         OnDragEnd.Invoke(draggable);
-        Debug.Log($"Завершено перетаскивание: {draggable.name}");
         DeactivateAllZones();
 
         // Если объект был над зоной, вызываем HandleDrop

@@ -41,7 +41,17 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        // Создаем персонажа при старте, если включено
+        // Подписываемся на событие готовности очереди
+        if (queueManager != null)
+        {
+            queueManager.OnQueueReady += OnQueueReady;
+        }
+    }
+    
+    // Вызывается когда очередь готова
+    private void OnQueueReady()
+    {
+        // Создаем персонажа только когда очередь готова
         if (createCharacterOnStart)
         {
             CreateCharacter();
@@ -112,5 +122,14 @@ public class GameManager : MonoBehaviour
     public GameObject GetCurrentCharacter()
     {
         return currentCharacter;
+    }
+    
+    private void OnDestroy()
+    {
+        // Отписываемся от события при уничтожении объекта
+        if (queueManager != null)
+        {
+            queueManager.OnQueueReady -= OnQueueReady;
+        }
     }
 } 

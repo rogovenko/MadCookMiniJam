@@ -160,7 +160,6 @@ public class ShelfZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         if (paper != null)
         {
             paper.SnapToCursorAndScale(paper.shelfScale);
-            Debug.Log($"ShelfZone: Бумага '{paper.paperContent}' уменьшена и центрирована на полке");
         }
     }
     
@@ -171,7 +170,6 @@ public class ShelfZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandle
         if (paper != null)
         {
             paper.SetDefaultScale();
-            Debug.Log($"ShelfZone: Бумага '{paper.paperContent}' возвращена к стандартному размеру");
         }
     }
     

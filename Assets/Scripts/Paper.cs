@@ -63,12 +63,12 @@ public class Paper : Draggable
     // Переопределяем методы для дополнительной логики
     protected override void OnStartDrag()
     {
-        Debug.Log("Paper picked up: " + paperContent);
+
     }
     
     protected override void OnEndDrag()
     {
-        Debug.Log("Paper dropped: " + paperContent);
+
     }
     
     // Метод для принудительного применения случайного вращения

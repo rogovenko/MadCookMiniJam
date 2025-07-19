@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public class QueueManager : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public class QueueManager : MonoBehaviour
     
     private List<GameObject> queueObjects = new List<GameObject>();
     private Dictionary<CharacterType, Sprite> characterSprites = new Dictionary<CharacterType, Sprite>();
+    
+    // Событие, которое вызывается когда очередь готова
+    public event Action OnQueueReady;
     
     private void Start()
     {
@@ -50,6 +54,11 @@ public class QueueManager : MonoBehaviour
             queueObjects.Add(queueObject);
             currentPosition.x += horizontalOffset;
         }
+
+        Debug.Log("QueueManager: Очередь создана");
+        
+        // Уведомляем что очередь готова
+        OnQueueReady?.Invoke();
     }
     
     public void ClearQueue()
