@@ -3,11 +3,18 @@ using System.Collections.Generic;
 
 public enum CharacterType
 {
-    Carrot,
-    Eggplant,
     Tomato,
+    Onion,
+    Potato,
     Cucumber,
-    Pepper
+    Eggplant,
+    Carrot
+}
+
+public enum CharacterShape
+{
+    Round,
+    Long
 }
 
 [System.Serializable]
@@ -16,11 +23,34 @@ public class CharacterSpriteData
     [Tooltip("Тип персонажа")]
     public CharacterType characterType;
     
-    [Tooltip("Спрайт персонажа")]
-    public Sprite characterSprite;
+    [Tooltip("Форма персонажа")]
+    public CharacterShape characterShape;
+    
+    [Tooltip("Спрайт тела персонажа")]
+    public Sprite bodySprite;
     
     [Tooltip("Название персонажа")]
     public string characterName;
+}
+
+[System.Serializable]
+public class EyesSpriteData
+{
+    [Tooltip("Форма персонажа")]
+    public CharacterShape shape;
+    
+    [Tooltip("Список спрайтов глаз")]
+    public List<Sprite> eyesSprites = new List<Sprite>();
+}
+
+[System.Serializable]
+public class ClothesSpriteData
+{
+    [Tooltip("Форма персонажа")]
+    public CharacterShape shape;
+    
+    [Tooltip("Список спрайтов одежды")]
+    public List<Sprite> clothesSprites = new List<Sprite>();
 }
 
 public class CharManager : MonoBehaviour
@@ -39,6 +69,14 @@ public class CharManager : MonoBehaviour
     [Tooltip("Список всех спрайтов персонажей")]
     [SerializeField] private List<CharacterSpriteData> characterSprites = new List<CharacterSpriteData>();
     
+    [Header("Спрайты глаз")]
+    [Tooltip("Список спрайтов глаз для каждой формы")]
+    [SerializeField] private List<EyesSpriteData> eyesSprites = new List<EyesSpriteData>();
+    
+    [Header("Спрайты одежды")]
+    [Tooltip("Список спрайтов одежды для каждой формы")]
+    [SerializeField] private List<ClothesSpriteData> clothesSprites = new List<ClothesSpriteData>();
+    
     void Start()
     {
         InitializeDefaultCharacters();
@@ -46,33 +84,44 @@ public class CharManager : MonoBehaviour
     
     void InitializeDefaultCharacters()
     {
-        // Создаем базовые записи персонажей
+        // Создаем базовые записи персонажей с их формами
         if (characterSprites.Count == 0)
         {
             characterSprites.Add(new CharacterSpriteData 
             { 
-                characterType = CharacterType.Carrot, 
-                characterName = "Carrot"
-            });
-            characterSprites.Add(new CharacterSpriteData 
-            { 
-                characterType = CharacterType.Eggplant, 
-                characterName = "Eggplant"
-            });
-            characterSprites.Add(new CharacterSpriteData 
-            { 
                 characterType = CharacterType.Tomato, 
+                characterShape = CharacterShape.Round,
                 characterName = "Tomato"
             });
             characterSprites.Add(new CharacterSpriteData 
             { 
+                characterType = CharacterType.Onion, 
+                characterShape = CharacterShape.Round,
+                characterName = "Onion"
+            });
+            characterSprites.Add(new CharacterSpriteData 
+            { 
+                characterType = CharacterType.Potato, 
+                characterShape = CharacterShape.Round,
+                characterName = "Potato"
+            });
+            characterSprites.Add(new CharacterSpriteData 
+            { 
                 characterType = CharacterType.Cucumber, 
+                characterShape = CharacterShape.Long,
                 characterName = "Cucumber"
             });
             characterSprites.Add(new CharacterSpriteData 
             { 
-                characterType = CharacterType.Pepper, 
-                characterName = "Pepper"
+                characterType = CharacterType.Eggplant, 
+                characterShape = CharacterShape.Long,
+                characterName = "Eggplant"
+            });
+            characterSprites.Add(new CharacterSpriteData 
+            { 
+                characterType = CharacterType.Carrot, 
+                characterShape = CharacterShape.Long,
+                characterName = "Carrot"
             });
         }
     }
@@ -112,16 +161,36 @@ public class CharManager : MonoBehaviour
             characterObj.transform.localPosition = position;
         }
         
-        // Находим спрайт для этого типа персонажа
+        // Находим данные для этого типа персонажа
         CharacterSpriteData spriteData = characterSprites.Find(c => c.characterType == characterType);
-        if (spriteData != null && spriteData.characterSprite != null)
+        if (spriteData != null)
         {
-            // Получаем компонент Character и устанавливаем тип и спрайт
+            // Получаем компонент Character и устанавливаем тип и спрайты
             Character characterComponent = characterObj.GetComponent<Character>();
             if (characterComponent != null)
             {
                 characterComponent.SetCharacterType(characterType);
-                characterComponent.SetCharacterSprite(spriteData.characterSprite);
+                characterComponent.SetCharacterShape(spriteData.characterShape);
+                
+                // Устанавливаем спрайт тела
+                if (spriteData.bodySprite != null)
+                {
+                    characterComponent.SetBodySprite(spriteData.bodySprite);
+                }
+                
+                // Случайно выбираем глаза для данной формы
+                Sprite randomEyes = GetRandomEyesForShape(spriteData.characterShape);
+                if (randomEyes != null)
+                {
+                    characterComponent.SetEyesSprite(randomEyes);
+                }
+                
+                // Случайно выбираем одежду для данной формы
+                Sprite randomClothes = GetRandomClothesForShape(spriteData.characterShape);
+                if (randomClothes != null)
+                {
+                    characterComponent.SetClothesSprite(randomClothes);
+                }
             }
             else
             {
@@ -130,17 +199,41 @@ public class CharManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"CharManager: Спрайт для персонажа {characterType} не найден!");
+            Debug.LogWarning($"CharManager: Данные для персонажа {characterType} не найдены!");
         }
         
         return characterObj;
     }
     
-    // Получить спрайт для типа персонажа
-    public Sprite GetCharacterSprite(CharacterType characterType)
+    // Получить случайные глаза для формы
+    private Sprite GetRandomEyesForShape(CharacterShape shape)
+    {
+        EyesSpriteData eyesData = eyesSprites.Find(e => e.shape == shape);
+        if (eyesData != null && eyesData.eyesSprites.Count > 0)
+        {
+            int randomIndex = Random.Range(0, eyesData.eyesSprites.Count);
+            return eyesData.eyesSprites[randomIndex];
+        }
+        return null;
+    }
+    
+    // Получить случайную одежду для формы
+    private Sprite GetRandomClothesForShape(CharacterShape shape)
+    {
+        ClothesSpriteData clothesData = clothesSprites.Find(c => c.shape == shape);
+        if (clothesData != null && clothesData.clothesSprites.Count > 0)
+        {
+            int randomIndex = Random.Range(0, clothesData.clothesSprites.Count);
+            return clothesData.clothesSprites[randomIndex];
+        }
+        return null;
+    }
+    
+    // Получить спрайт тела для типа персонажа
+    public Sprite GetCharacterBodySprite(CharacterType characterType)
     {
         CharacterSpriteData spriteData = characterSprites.Find(c => c.characterType == characterType);
-        return spriteData?.characterSprite;
+        return spriteData?.bodySprite;
     }
     
     // Получить список всех доступных типов персонажей

@@ -13,8 +13,12 @@ public class QueueManager : MonoBehaviour
     [SerializeField] private List<CharacterType> initialQueue = new List<CharacterType>();
     
     [Header("Character Sprites")]
-    [SerializeField] private Sprite carrotSprite;
+    [SerializeField] private Sprite tomatoSprite;
+    [SerializeField] private Sprite onionSprite;
+    [SerializeField] private Sprite potatoSprite;
+    [SerializeField] private Sprite cucumberSprite;
     [SerializeField] private Sprite eggplantSprite;
+    [SerializeField] private Sprite carrotSprite;
     
     private List<GameObject> queueObjects = new List<GameObject>();
     private Dictionary<CharacterType, Sprite> characterSprites = new Dictionary<CharacterType, Sprite>();
@@ -30,8 +34,12 @@ public class QueueManager : MonoBehaviour
     
     private void InitializeCharacterSprites()
     {
-        characterSprites[CharacterType.Carrot] = carrotSprite;
+        characterSprites[CharacterType.Tomato] = tomatoSprite;
+        characterSprites[CharacterType.Onion] = onionSprite;
+        characterSprites[CharacterType.Potato] = potatoSprite;
+        characterSprites[CharacterType.Cucumber] = cucumberSprite;
         characterSprites[CharacterType.Eggplant] = eggplantSprite;
+        characterSprites[CharacterType.Carrot] = carrotSprite;
     }
     
     public void CreateQueue(List<CharacterType> characterTypes)
@@ -89,7 +97,7 @@ public class QueueManager : MonoBehaviour
             
             return characterType;
         }
-        return CharacterType.Carrot; // Возвращаем Carrot как fallback
+        return CharacterType.Tomato; // Возвращаем Tomato как fallback
     }
     
     private void RepositionQueue()
@@ -114,7 +122,7 @@ public class QueueManager : MonoBehaviour
             // Получаем тип персонажа из первого объекта в очереди
             return GetCharacterTypeFromQueueObject(queueObjects[0]);
         }
-        return CharacterType.Carrot; // Возвращаем Carrot как fallback
+        return CharacterType.Tomato; // Возвращаем Tomato как fallback
     }
     
     // Получить тип персонажа из объекта очереди
@@ -132,7 +140,7 @@ public class QueueManager : MonoBehaviour
                 }
             }
         }
-        return CharacterType.Carrot; // Возвращаем Carrot как fallback
+        return CharacterType.Tomato; // Возвращаем Tomato как fallback
     }
     
     // Получить количество персонажей в очереди

@@ -5,21 +5,41 @@ public class Character : MonoBehaviour
 {
     [Header("Настройки персонажа")]
     [Tooltip("Текущий тип персонажа")]
-    [SerializeField] private CharacterType characterType = CharacterType.Carrot;
+    [SerializeField] private CharacterType characterType = CharacterType.Tomato;
+    
+    [Tooltip("Форма персонажа")]
+    [SerializeField] private CharacterShape characterShape = CharacterShape.Round;
     
     [Tooltip("Кастомное название персонажа")]
     [SerializeField] private string customCharacterName = "";
 
     [Header("Компоненты")]
-    [Tooltip("Image компонент для отображения спрайта персонажа")]
-    [SerializeField] private Image characterImage;
+    [Tooltip("Image компонент для отображения тела персонажа")]
+    [SerializeField] private Image bodyImage;
+    
+    [Tooltip("Image компонент для отображения глаз")]
+    [SerializeField] private Image eyesImage;
+    
+    [Tooltip("Image компонент для отображения одежды")]
+    [SerializeField] private Image clothesImage;
 
     void Start()
     {
-        // Если Image не назначен, пытаемся найти его на этом объекте
-        if (characterImage == null)
+        // Если Image компоненты не назначены, пытаемся найти их на этом объекте
+        if (bodyImage == null)
         {
-            characterImage = GetComponent<Image>();
+            bodyImage = GetComponent<Image>();
+        }
+        
+        // Глаза и одежда должны быть дочерними объектами
+        if (eyesImage == null)
+        {
+            eyesImage = transform.Find("Eyes")?.GetComponent<Image>();
+        }
+        
+        if (clothesImage == null)
+        {
+            clothesImage = transform.Find("Clothes")?.GetComponent<Image>();
         }
     }
 
@@ -28,23 +48,67 @@ public class Character : MonoBehaviour
     {
         characterType = newType;
     }
-
-    // Установить спрайт персонажа
-    public void SetCharacterSprite(Sprite sprite)
+    
+    // Установить форму персонажа
+    public void SetCharacterShape(CharacterShape newShape)
     {
-        if (characterImage == null)
+        characterShape = newShape;
+    }
+    
+    // Установить спрайт тела
+    public void SetBodySprite(Sprite sprite)
+    {
+        if (bodyImage == null)
         {
-            Debug.LogError($"Character: Image компонент не найден на {gameObject.name}!");
+            Debug.LogError($"Character: Body Image компонент не найден на {gameObject.name}!");
             return;
         }
 
         if (sprite != null)
         {
-            characterImage.sprite = sprite;
+            bodyImage.sprite = sprite;
         }
         else
         {
-            Debug.LogError($"Character: Спрайт для {characterType} не назначен!");
+            Debug.LogError($"Character: Спрайт тела для {characterType} не назначен!");
+        }
+    }
+    
+    // Установить спрайт глаз
+    public void SetEyesSprite(Sprite sprite)
+    {
+        if (eyesImage == null)
+        {
+            Debug.LogError($"Character: Eyes Image компонент не найден на {gameObject.name}!");
+            return;
+        }
+
+        if (sprite != null)
+        {
+            eyesImage.sprite = sprite;
+        }
+        else
+        {
+            Debug.LogError($"Character: Спрайт глаз для {characterType} не назначен!");
+        }
+    }
+    
+    // Установить спрайт одежды
+    public void SetClothesSprite(Sprite sprite)
+    {
+        if (clothesImage == null)
+        {
+            Debug.LogError($"Character: Clothes Image компонент не найден на {gameObject.name}!");
+            return;
+        }
+
+        if (sprite != null)
+        {
+            clothesImage.sprite = sprite;
+        }
+        else
+        {
+            Debug.LogError($"Character: Спрайт одежды для {characterType} не назначен!");
         }
     }
 
@@ -52,6 +116,12 @@ public class Character : MonoBehaviour
     public CharacterType GetCharacterType()
     {
         return characterType;
+    }
+    
+    // Получить форму персонажа
+    public CharacterShape GetCharacterShape()
+    {
+        return characterShape;
     }
 
     // Получить имя персонажа

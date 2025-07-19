@@ -1579,11 +1579,57 @@ MonoBehaviour:
   spawnPosition: {fileID: 717909160}
   characterSprites:
   - characterType: 0
-    characterSprite: {fileID: 21300000, guid: be57c5b9581953b4386f9d93b961ab0c, type: 3}
+    characterShape: 0
+    bodySprite: {fileID: 21300000, guid: e22af22ff827f0641b9a612bec59db0a, type: 3}
     characterName: 
   - characterType: 1
-    characterSprite: {fileID: 21300000, guid: ff74e6bb46d737d459bf71dbc7e5ac61, type: 3}
+    characterShape: 0
+    bodySprite: {fileID: 21300000, guid: cbabbd18381af6244b97a19dc0288e8e, type: 3}
     characterName: 
+  - characterType: 2
+    characterShape: 0
+    bodySprite: {fileID: 21300000, guid: cb398673ad4f6274394aa9cc7b56210c, type: 3}
+    characterName: 
+  - characterType: 5
+    characterShape: 1
+    bodySprite: {fileID: 21300000, guid: e7d7ba5d94a2cea4ba3db4fb679e650a, type: 3}
+    characterName: 
+  - characterType: 3
+    characterShape: 1
+    bodySprite: {fileID: 21300000, guid: ad542011c07058640a19d7b9fd6e0528, type: 3}
+    characterName: 
+  - characterType: 4
+    characterShape: 1
+    bodySprite: {fileID: 21300000, guid: bf9bec9c854b1834cbf5fc08ec03e990, type: 3}
+    characterName: 
+  eyesSprites:
+  - shape: 0
+    eyesSprites:
+    - {fileID: 21300000, guid: 43fc507fd5fa3a64f92feef5459e5580, type: 3}
+    - {fileID: 21300000, guid: 7a73899f11eafbd4991db86a4c48b666, type: 3}
+    - {fileID: 21300000, guid: ccec4c47e974b954d82f94f94c897856, type: 3}
+    - {fileID: 21300000, guid: 48ec21d0d6e15ff4b9bcb6dd19e38f54, type: 3}
+    - {fileID: 21300000, guid: 6dfcea4fe2f3867468a7df3823ddb89d, type: 3}
+    - {fileID: 21300000, guid: 8aaf6d87e85766940a0906e0f35e4598, type: 3}
+  - shape: 1
+    eyesSprites:
+    - {fileID: 21300000, guid: 122417bac5f7dad4a9b0635a31c47f51, type: 3}
+    - {fileID: 21300000, guid: 9ab86ac56ecdfff438826d6878eff03d, type: 3}
+    - {fileID: 21300000, guid: cd367220bf80f9149bc39ac66592e25d, type: 3}
+    - {fileID: 21300000, guid: f8633b04da0da7742a953f6017254e32, type: 3}
+    - {fileID: 21300000, guid: 0128548cf1c90164a94e6cf81d77c064, type: 3}
+    - {fileID: 21300000, guid: dc4b3b2025a98a74ca62c8e42add91c7, type: 3}
+  clothesSprites:
+  - shape: 0
+    clothesSprites:
+    - {fileID: 21300000, guid: 9ea05b2ff786b1f47b357defc156b2c9, type: 3}
+    - {fileID: 21300000, guid: 5f2bfbeec2fd43349b51fbb89eb9aedf, type: 3}
+    - {fileID: 21300000, guid: 82fa18391d59cc34b9fce504c22ffb7e, type: 3}
+  - shape: 1
+    clothesSprites:
+    - {fileID: 21300000, guid: a6aa97edececbe64b87a871edf69a482, type: 3}
+    - {fileID: 21300000, guid: 3d05084bcc409a64c80a031a1489ab25, type: 3}
+    - {fileID: 21300000, guid: 1f8c0159a4470a441ac03afe19e407b6, type: 3}
 --- !u!1 &1013766540
 GameObject:
   m_ObjectHideFlags: 0
@@ -2357,7 +2403,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   charManager: {fileID: 717909161}
   queueManager: {fileID: 1998771136}
-  gameTimer: {fileID: 0}
+  gameTimer: {fileID: 1089850514}
   createCharacterOnStart: 1
   currentCharacter: {fileID: 0}
 --- !u!4 &1631151478
@@ -2673,9 +2719,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   charShadowPrefab: {fileID: 3589493434239733745, guid: b2e1c3c2d5adf8f4b97f040a8144887b, type: 3}
   horizontalOffset: 100
-  initialQueue: 0000000001000000010000000000000000000000
-  carrotSprite: {fileID: 21300000, guid: be57c5b9581953b4386f9d93b961ab0c, type: 3}
+  initialQueue: 0000000003000000040000000000000000000000010000000200000005000000
+  tomatoSprite: {fileID: 21300000, guid: e22af22ff827f0641b9a612bec59db0a, type: 3}
+  onionSprite: {fileID: 21300000, guid: cbabbd18381af6244b97a19dc0288e8e, type: 3}
+  potatoSprite: {fileID: 21300000, guid: cb398673ad4f6274394aa9cc7b56210c, type: 3}
+  cucumberSprite: {fileID: 21300000, guid: ad542011c07058640a19d7b9fd6e0528, type: 3}
   eggplantSprite: {fileID: 21300000, guid: ff74e6bb46d737d459bf71dbc7e5ac61, type: 3}
+  carrotSprite: {fileID: 21300000, guid: be57c5b9581953b4386f9d93b961ab0c, type: 3}
 --- !u!224 &1998771137
 RectTransform:
   m_ObjectHideFlags: 0
