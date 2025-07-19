@@ -19,6 +19,10 @@ public class DragEventSystem : MonoBehaviour
     private List<ShelfZone> activeShelfZones = new List<ShelfZone>();
     private SendZone currentZoneUnderDraggedObject;
     private ShelfZone currentShelfZoneUnderDraggedObject;
+    
+    [Header("Глобальное управление drag'n'drop")]
+    [Tooltip("Включен ли drag'n'drop глобально")]
+    [SerializeField] private bool isDragDropEnabled = true;
 
     void Awake()
     {
@@ -163,5 +167,40 @@ public class DragEventSystem : MonoBehaviour
     public List<SendZone> GetAllZones()
     {
         return new List<SendZone>(activeZones);
+    }
+    
+    // Глобальное управление drag'n'drop
+    public void EnableDragDrop()
+    {
+        isDragDropEnabled = true;
+        Debug.Log("DragEventSystem: Drag'n'drop включен глобально");
+    }
+    
+    public void DisableDragDrop()
+    {
+        isDragDropEnabled = false;
+        Debug.Log("DragEventSystem: Drag'n'drop отключен глобально");
+        
+        // Если что-то перетаскивается, останавливаем
+        if (currentDraggedObject != null)
+        {
+            currentDraggedObject.OnEndDrag(null);
+        }
+    }
+    
+    public void SetDragDropEnabled(bool enabled)
+    {
+        isDragDropEnabled = enabled;
+        Debug.Log($"DragEventSystem: Drag'n'drop {(enabled ? "включен" : "отключен")} глобально");
+        
+        if (!enabled && currentDraggedObject != null)
+        {
+            currentDraggedObject.OnEndDrag(null);
+        }
+    }
+    
+    public bool IsDragDropEnabled()
+    {
+        return isDragDropEnabled;
     }
 } 

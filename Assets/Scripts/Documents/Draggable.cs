@@ -47,6 +47,12 @@ public abstract class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler
     
     public virtual void OnBeginDrag(PointerEventData eventData)
     {
+        // Проверяем, включен ли drag'n'drop глобально
+        if (DragEventSystem.Instance != null && !DragEventSystem.Instance.IsDragDropEnabled())
+        {
+            return; // Не начинаем перетаскивание если drag'n'drop отключен
+        }
+        
         // Начинаем перетаскивание
         isDragging = true;
         

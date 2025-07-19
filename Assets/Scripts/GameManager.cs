@@ -12,9 +12,18 @@ public class GameManager : MonoBehaviour
     [Tooltip("Таймер игры")]
     public Timer gameTimer;
     
+    [Tooltip("Система событий drag'n'drop")]
+    public DragEventSystem dragEventSystem;
+    
+    [Tooltip("Кнопка Tasty")]
+    public TastyButton tastyButton;
+    
     [Header("Настройки игры")]
     [Tooltip("Создать персонажа при старте игры")]
     [SerializeField] private bool createCharacterOnStart = true;
+    
+    [Tooltip("Режим выбора заказа")]
+    [SerializeField] private bool chooseOrderMode = false;
     
     [Header("Текущий персонаж")]
     [Tooltip("Текущий активный персонаж")]
@@ -51,6 +60,28 @@ public class GameManager : MonoBehaviour
             if (gameTimer == null)
             {
                 Debug.LogError("GameManager: Timer не найден на сцене!");
+                return;
+            }
+        }
+        
+        // Проверяем наличие DragEventSystem
+        if (dragEventSystem == null)
+        {
+            dragEventSystem = FindObjectOfType<DragEventSystem>();
+            if (dragEventSystem == null)
+            {
+                Debug.LogError("GameManager: DragEventSystem не найден на сцене!");
+                return;
+            }
+        }
+        
+        // Проверяем наличие TastyButton
+        if (tastyButton == null)
+        {
+            tastyButton = FindObjectOfType<TastyButton>();
+            if (tastyButton == null)
+            {
+                Debug.LogError("GameManager: TastyButton не найден на сцене!");
                 return;
             }
         }
@@ -150,7 +181,25 @@ public class GameManager : MonoBehaviour
     // Действие "Tasty" - принять персонажа
     public void TastyAction()
     {
-        DestroyCurrentCharacter();
+        // Переключаем режим выбора заказа
+        chooseOrderMode = !chooseOrderMode;
+        
+        Debug.Log($"GameManager: Режим выбора заказа изменен на {(chooseOrderMode ? "активный" : "неактивный")}");
+        
+        // Управляем drag'n'drop через DragEventSystem
+        if (dragEventSystem != null)
+        {
+            if (chooseOrderMode)
+            {
+                dragEventSystem.DisableDragDrop();
+            }
+            else
+            {
+                dragEventSystem.EnableDragDrop();
+            }
+        }
+        
+        // DestroyCurrentCharacter();
     }
     
     // Получить текущего персонажа
@@ -192,6 +241,96 @@ public class GameManager : MonoBehaviour
     public bool IsGameTimeUp()
     {
         return gameTimer != null && gameTimer.IsTimeUp();
+    }
+    
+    // Методы для работы с drag'n'drop
+    public void EnableDragDrop()
+    {
+        if (dragEventSystem != null)
+        {
+            dragEventSystem.EnableDragDrop();
+        }
+    }
+    
+    public void DisableDragDrop()
+    {
+        if (dragEventSystem != null)
+        {
+            dragEventSystem.DisableDragDrop();
+        }
+    }
+    
+    public void SetDragDropEnabled(bool enabled)
+    {
+        if (dragEventSystem != null)
+        {
+            dragEventSystem.SetDragDropEnabled(enabled);
+        }
+    }
+    
+    public bool IsDragDropEnabled()
+    {
+        return dragEventSystem != null && dragEventSystem.IsDragDropEnabled();
+    }
+    
+    // Методы для работы с режимом выбора заказа
+    public bool IsChooseOrderMode()
+    {
+        return chooseOrderMode;
+    }
+    
+    // Методы для работы с кнопкой Tasty
+    public void MakeTastyButtonActive()
+    {
+        if (tastyButton != null)
+        {
+            tastyButton.MakeActive();
+        }
+    }
+    
+    public void MakeTastyButtonInactive()
+    {
+        if (tastyButton != null)
+        {
+            tastyButton.MakeInactive();
+        }
+    }
+    
+    public bool IsTastyButtonActive()
+    {
+        return tastyButton != null && tastyButton.IsActivated();
+    }
+    
+    public void SetChooseOrderMode(bool mode)
+    {
+        chooseOrderMode = mode;
+        Debug.Log($"GameManager: Режим выбора заказа установлен на {(chooseOrderMode ? "активный" : "неактивный")}");
+        
+        // Управляем drag'n'drop в зависимости от режима
+        if (dragEventSystem != null)
+        {
+            if (chooseOrderMode)
+            {
+                dragEventSystem.DisableDragDrop();
+            }
+            else
+            {
+                dragEventSystem.EnableDragDrop();
+            }
+        }
+        
+        // Управляем кнопкой Tasty
+        if (tastyButton != null)
+        {
+            if (chooseOrderMode)
+            {
+                tastyButton.MakeInactive();
+            }
+            else
+            {
+                tastyButton.MakeActive();
+            }
+        }
     }
     
     private void OnDestroy()
