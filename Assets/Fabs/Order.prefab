@@ -294,12 +294,13 @@ MonoBehaviour:
   dragAlpha: 0.8
   paperImage: {fileID: 8739358322555047067}
   paperText: {fileID: 2535544023502940284}
-  paperContent: Sample Document
+  paperContent: Order
   enableRandomRotation: 1
   maxRotationAngle: 15
   defaultScale: {x: 1, y: 1, z: 1}
   shelfScale: {x: 0.33, y: 0.33, z: 0.33}
   scaleAnimationDuration: 0.3
+  gameManager: {fileID: 0}
   maxStickers: 6
   stickerSlots:
   - stickerImage: {fileID: 8804109567267889523}
@@ -333,7 +334,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.98089546, b: 0.740566, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

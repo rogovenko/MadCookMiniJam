@@ -15,12 +15,12 @@ public class PaperSpawner : MonoBehaviour
     [Tooltip("Случайное смещение при спауне (разброс)")]
     public float randomOffset = 30f;
 
-    public void SpawnPaper()
+    public GameObject SpawnPaper()
     {
         if (paperPrefab == null)
         {
             Debug.LogError("PaperSpawner: Не назначен префаб бумаги!");
-            return;
+            return null;
         }
 
         // Определяем позицию спауна
@@ -49,5 +49,9 @@ public class PaperSpawner : MonoBehaviour
         {
             paperObj.transform.localPosition = finalPosition;
         }
+        
+        Debug.Log($"PaperSpawner: Создана бумажка {paperObj.name} в позиции {finalPosition}");
+        
+        return paperObj;
     }
 } 

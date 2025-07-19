@@ -18,6 +18,9 @@ public class GameManager : MonoBehaviour
     [Tooltip("Кнопка Tasty")]
     public TastyButton tastyButton;
     
+    [Tooltip("Спавнер бумаг")]
+    public PaperSpawner paperSpawner;
+    
     [Header("Настройки игры")]
     [Tooltip("Создать персонажа при старте игры")]
     [SerializeField] private bool createCharacterOnStart = true;
@@ -28,6 +31,10 @@ public class GameManager : MonoBehaviour
     [Header("Текущий персонаж")]
     [Tooltip("Текущий активный персонаж")]
     [SerializeField] private GameObject currentCharacter;
+    
+    [Header("Текущая бумажка")]
+    [Tooltip("Текущая созданная бумажка")]
+    [SerializeField] private GameObject currentPaper;
     
     void Start()
     {
@@ -82,6 +89,17 @@ public class GameManager : MonoBehaviour
             if (tastyButton == null)
             {
                 Debug.LogError("GameManager: TastyButton не найден на сцене!");
+                return;
+            }
+        }
+        
+        // Проверяем наличие PaperSpawner
+        if (paperSpawner == null)
+        {
+            paperSpawner = FindObjectOfType<PaperSpawner>();
+            if (paperSpawner == null)
+            {
+                Debug.LogError("GameManager: PaperSpawner не найден на сцене!");
                 return;
             }
         }
@@ -162,6 +180,10 @@ public class GameManager : MonoBehaviour
     {
         if (currentCharacter != null)
         {
+            // Уничтожаем текущую бумажку, если она есть
+            DestroyCurrentPaper();
+            
+            // Уничтожаем персонажа
             Destroy(currentCharacter);
             currentCharacter = null;
             CreateCharacter();
@@ -200,6 +222,91 @@ public class GameManager : MonoBehaviour
         }
         
         // DestroyCurrentCharacter();
+    }
+    
+    // "Раздеть" текущего персонажа
+    public void StripCurrentCharacter()
+    {
+        if (currentCharacter != null)
+        {
+            Character characterComponent = currentCharacter.GetComponent<Character>();
+            if (characterComponent != null)
+            {
+                characterComponent.GetNaked();
+            }
+            else
+            {
+                Debug.LogError("GameManager: На текущем персонаже отсутствует компонент Character!");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("GameManager: Нет текущего персонажа для раздевания!");
+        }
+    }
+    
+    // Запустить спавн бумаг
+    public void PapersPlease()
+    {
+        if (currentCharacter != null)
+        {
+            Character characterComponent = currentCharacter.GetComponent<Character>();
+            if (characterComponent != null)
+            {
+                // Проверяем, была ли уже запрошена бумажка у этого персонажа
+                if (characterComponent.HasBeenAskedForPapers())
+                {
+                    Debug.LogWarning("GameManager: У этого персонажа уже была запрошена бумажка!");
+                    return;
+                }
+                
+                // Отмечаем персонажа как уже запрошенного
+                characterComponent.MarkAsAskedForPapers();
+                
+                // Запускаем спавн бумаг
+                if (paperSpawner != null)
+                {
+                    // Создаем бумажку и сохраняем ссылку на неё
+                    currentPaper = paperSpawner.SpawnPaper();
+                    Debug.Log("GameManager: Запущен спавн бумаг!");
+                }
+                else
+                {
+                    Debug.LogError("GameManager: PaperSpawner не назначен!");
+                }
+            }
+            else
+            {
+                Debug.LogError("GameManager: На текущем персонаже отсутствует компонент Character!");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("GameManager: Нет текущего персонажа для запроса бумажек!");
+        }
+    }
+    
+    // Уничтожить текущую бумажку
+    public void DestroyCurrentPaper()
+    {
+        if (currentPaper != null)
+        {
+            Destroy(currentPaper);
+            currentPaper = null;
+            Debug.Log("GameManager: Текущая бумажка уничтожена!");
+        }
+    }
+    
+    // Получить текущую бумажку
+    public GameObject GetCurrentPaper()
+    {
+        return currentPaper;
+    }
+    
+    // Установить текущую бумажку
+    public void SetCurrentPaper(GameObject paper)
+    {
+        currentPaper = paper;
     }
     
     // Получить текущего персонажа

@@ -15,6 +15,9 @@ public class Character : MonoBehaviour
     
     [Tooltip("Текущий дефект персонажа")]
     [SerializeField] private CharacterDefect currentDefect = CharacterDefect.None;
+    
+    [Tooltip("Была ли уже запрошена бумажка у этого персонажа")]
+    [SerializeField] private bool hasBeenAskedForPapers = false;
 
     [Header("Компоненты")]
     [Tooltip("Image компонент для отображения тела персонажа")]
@@ -191,6 +194,42 @@ public class Character : MonoBehaviour
     public CharacterDefect GetCurrentDefect()
     {
         return currentDefect;
+    }
+    
+    // Проверить, была ли уже запрошена бумажка
+    public bool HasBeenAskedForPapers()
+    {
+        return hasBeenAskedForPapers;
+    }
+    
+    // Отметить, что бумажка была запрошена
+    public void MarkAsAskedForPapers()
+    {
+        hasBeenAskedForPapers = true;
+        Debug.Log($"Character: Персонаж {gameObject.name} отмечен как уже запрошенный для бумажек");
+    }
+    
+    // Сбросить флаг запроса бумажек (для повторного использования персонажа)
+    public void ResetPapersRequest()
+    {
+        hasBeenAskedForPapers = false;
+        Debug.Log($"Character: Сброшен флаг запроса бумажек для персонажа {gameObject.name}");
+    }
+    
+    // "Раздеть" персонажа - убрать одежду
+    public void GetNaked()
+    {
+        if (clothesImage != null)
+        {
+            // Скрываем компонент одежды
+            clothesImage.gameObject.SetActive(false);
+            
+            Debug.Log($"Character: Персонаж {gameObject.name} разделся (одежда убрана)");
+        }
+        else
+        {
+            Debug.LogWarning($"Character: Clothes Image компонент не найден на {gameObject.name}!");
+        }
     }
 
     // Получить имя персонажа
