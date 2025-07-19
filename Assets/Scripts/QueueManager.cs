@@ -54,8 +54,6 @@ public class QueueManager : MonoBehaviour
             queueObjects.Add(queueObject);
             currentPosition.x += horizontalOffset;
         }
-
-        Debug.Log("QueueManager: Очередь создана");
         
         // Уведомляем что очередь готова
         OnQueueReady?.Invoke();
