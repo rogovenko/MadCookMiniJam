@@ -131,6 +131,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 7356149056711866469, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
+      propertyPath: initialTimeInSeconds
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: 9101548384978308940, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
+      propertyPath: gameDay
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 9101548384978308940, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
+      propertyPath: gameMonth
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 9101548384978308940, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
       propertyPath: endGameCanvas
       value: 

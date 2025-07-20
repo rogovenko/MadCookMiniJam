@@ -10,11 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f9341055b93c4714c92c9828c83d3de1, type: 3}
-  m_Name: EggplantOnion
+  m_Name: CountrysideCabbageSoup
   m_EditorClassIdentifier: 
-  recipeName: Eggplant & Onion Duo Stew
+  recipeName: Countryside Cabbage Soup
   ingredients:
-  - ingredientType: 4
-    amount: 2
   - ingredientType: 1
+    amount: 3
+  - ingredientType: 5
     amount: 2
+  - ingredientType: 4
+    amount: 0
