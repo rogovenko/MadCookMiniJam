@@ -28,6 +28,10 @@ public class GameManager : MonoBehaviour
     [Tooltip("Календарь")]
     public Calendar calendar;
     
+    [Header("End Game UI")]
+    [Tooltip("Canvas для экрана окончания игры")]
+    [SerializeField] private Canvas endGameCanvas;
+    
     [Header("Рецепты уровня")]
     [Tooltip("Рецепты, которые нужно выполнить на текущем уровне")]
     public List<RecipeData> currentLevelRecipes = new List<RecipeData>();
@@ -174,6 +178,21 @@ public class GameManager : MonoBehaviour
             if (calendar == null)
             {
                 Debug.LogWarning("GameManager: Calendar не найден на сцене!");
+            }
+        }
+        
+        // Проверяем наличие EndGameCanvas
+        if (endGameCanvas == null)
+        {
+            endGameCanvas = FindObjectOfType<Canvas>();
+            if (endGameCanvas != null && endGameCanvas.name.Contains("EndGame"))
+            {
+                // Отключаем EndGameCanvas по умолчанию
+                endGameCanvas.gameObject.SetActive(false);
+            }
+            else
+            {
+                Debug.LogWarning("GameManager: EndGameCanvas не найден на сцене!");
             }
         }
         
@@ -1124,10 +1143,10 @@ public class GameManager : MonoBehaviour
         return errors;
     }
     
-    // Переключить на сцену окончания игры
-    public void LoadEndGameScene()
+    // Показать экран окончания игры
+    public void ShowEndGameUI()
     {
-        Debug.Log("GameManager: Переключение на сцену окончания игры...");
+        Debug.Log("GameManager: Показываем экран окончания игры...");
         
         // Останавливаем таймер если он активен
         if (gameTimer != null)
@@ -1147,8 +1166,28 @@ public class GameManager : MonoBehaviour
         // Уничтожаем текущую бумажку если она есть
         DestroyCurrentPaper();
         
-        // Загружаем сцену окончания игры
-        UnityEngine.SceneManagement.SceneManager.LoadScene("EndGameScene");
+        // Показываем EndGameCanvas
+        if (endGameCanvas != null)
+        {
+            endGameCanvas.gameObject.SetActive(true);
+            Debug.Log("GameManager: EndGameCanvas активирован");
+        }
+        else
+        {
+            Debug.LogError("GameManager: EndGameCanvas не найден! Не удалось показать экран окончания игры.");
+        }
+    }
+    
+    // Скрыть экран окончания игры
+    public void HideEndGameUI()
+    {
+        Debug.Log("GameManager: Скрываем экран окончания игры...");
+        
+        if (endGameCanvas != null)
+        {
+            endGameCanvas.gameObject.SetActive(false);
+            Debug.Log("GameManager: EndGameCanvas деактивирован");
+        }
     }
     
     private void OnDestroy()
