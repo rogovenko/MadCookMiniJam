@@ -32,6 +32,9 @@ public class GameManager : MonoBehaviour
     [Tooltip("Canvas для экрана окончания игры")]
     [SerializeField] private Canvas endGameCanvas;
     
+    [Tooltip("EndGameManager для управления экраном окончания игры")]
+    [SerializeField] private EndGameManager endGameManager;
+    
     [Header("Рецепты уровня")]
     [Tooltip("Рецепты, которые нужно выполнить на текущем уровне")]
     public List<RecipeData> currentLevelRecipes = new List<RecipeData>();
@@ -89,6 +92,16 @@ public class GameManager : MonoBehaviour
     
     [Tooltip("Время добавляемое за ошибку")]
     [SerializeField] private float addTimerMistake = 30f;
+    
+    [Header("Отслеживание заказов")]
+    [Tooltip("Количество отправленных заказов")]
+    [SerializeField] private int completedOrdersCount = 0;
+    
+    [Tooltip("Общее количество заказов на уровне")]
+    [SerializeField] private int totalOrdersCount = 0;
+    
+    [Tooltip("Флаг для предотвращения повторного вызова ShowEndGameUI")]
+    [SerializeField] private bool endGameTriggered = false;
     
     private System.DateTime gameCurrentDate;
     
@@ -193,6 +206,21 @@ public class GameManager : MonoBehaviour
             else
             {
                 Debug.LogWarning("GameManager: EndGameCanvas не найден на сцене!");
+            }
+        }
+        
+        // Проверяем наличие EndGameManager
+        if (endGameManager == null)
+        {
+            endGameManager = FindObjectOfType<EndGameManager>();
+            if (endGameManager == null)
+            {
+                Debug.LogWarning("GameManager: EndGameManager не найден на сцене!");
+            }
+            else
+            {
+                // Устанавливаем ссылку на GameManager в EndGameManager
+                endGameManager.SetGameManager(this);
             }
         }
         
@@ -574,6 +602,13 @@ public class GameManager : MonoBehaviour
             Debug.LogError("GameManager: orderSpawnPosition не назначен! Нельзя создать заказы.");
             return;
         }
+
+        // Сбрасываем счетчики заказов
+        completedOrdersCount = 0;
+        totalOrdersCount = currentLevelRecipes.Count;
+        endGameTriggered = false; // Сбрасываем флаг окончания игры
+        
+        Debug.Log($"GameManager: Инициализируем {totalOrdersCount} заказов");
 
         foreach (RecipeData recipe in currentLevelRecipes)
         {
@@ -1000,6 +1035,9 @@ public class GameManager : MonoBehaviour
         
         Debug.Log($"GameManager: Проверяем заказ '{order.name}'");
         
+        // Увеличиваем счетчик завершенных заказов (для всех заказов)
+        IncrementCompletedOrders();
+        
         // Сначала проверяем правильность собранных ингредиентов
         bool ingredientsCorrect = order.CheckIngredientsCorrectness();
         if (!ingredientsCorrect)
@@ -1146,6 +1184,13 @@ public class GameManager : MonoBehaviour
     // Показать экран окончания игры
     public void ShowEndGameUI()
     {
+        if (endGameTriggered)
+        {
+            Debug.Log("GameManager: ShowEndGameUI уже был вызван, игнорируем повторный вызов");
+            return;
+        }
+        
+        endGameTriggered = true; // Устанавливаем флаг сразу в начале
         Debug.Log("GameManager: Показываем экран окончания игры...");
         
         // Останавливаем таймер если он активен
@@ -1176,6 +1221,16 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError("GameManager: EndGameCanvas не найден! Не удалось показать экран окончания игры.");
         }
+        
+        // Показываем экран окончания игры через EndGameManager
+        if (endGameManager != null)
+        {
+            endGameManager.ShowEndGameScreen();
+        }
+        else
+        {
+            Debug.LogWarning("GameManager: EndGameManager не найден! Не удалось показать детальный экран окончания игры.");
+        }
     }
     
     // Скрыть экран окончания игры
@@ -1188,6 +1243,56 @@ public class GameManager : MonoBehaviour
             endGameCanvas.gameObject.SetActive(false);
             Debug.Log("GameManager: EndGameCanvas деактивирован");
         }
+    }
+    
+    // Получить все заказы на сцене
+    public List<Order> GetAllOrders()
+    {
+        List<Order> allOrders = new List<Order>();
+        
+        // Ищем все объекты с компонентом Order
+        Order[] orders = FindObjectsOfType<Order>();
+        allOrders.AddRange(orders);
+        
+        Debug.Log($"GameManager: Найдено {allOrders.Count} заказов на сцене");
+        return allOrders;
+    }
+    
+    // Увеличить счетчик завершенных заказов
+    public void IncrementCompletedOrders()
+    {
+        completedOrdersCount++;
+        Debug.Log($"GameManager: Заказ завершен! Прогресс: {completedOrdersCount}/{totalOrdersCount}");
+        
+        // Проверяем, все ли заказы завершены
+        CheckAllOrdersDone();
+    }
+    
+    // Проверить, все ли заказы завершены
+    public void CheckAllOrdersDone()
+    {
+        if (completedOrdersCount >= totalOrdersCount && totalOrdersCount > 0 && !endGameTriggered)
+        {
+            Debug.Log($"GameManager: Все заказы завершены! ({completedOrdersCount}/{totalOrdersCount})");
+            Debug.Log("GameManager: Вызываем ShowEndGameUI()");
+            ShowEndGameUI();
+        }
+        else
+        {
+            Debug.Log($"GameManager: Прогресс заказов: {completedOrdersCount}/{totalOrdersCount}");
+        }
+    }
+    
+    // Получить количество завершенных заказов
+    public int GetCompletedOrdersCount()
+    {
+        return completedOrdersCount;
+    }
+    
+    // Получить общее количество заказов
+    public int GetTotalOrdersCount()
+    {
+        return totalOrdersCount;
     }
     
     private void OnDestroy()

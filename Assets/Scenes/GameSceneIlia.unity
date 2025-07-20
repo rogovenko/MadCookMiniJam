@@ -413,6 +413,17 @@ Canvas:
   m_CorrespondingSourceObject: {fileID: 72919391924011552, guid: 2e664d50c985cc340ba649cd7115ebb6, type: 3}
   m_PrefabInstance: {fileID: 2764516648824388536}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1565258227934248120 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8458511237139069052, guid: 2e664d50c985cc340ba649cd7115ebb6, type: 3}
+  m_PrefabInstance: {fileID: 2764516648824388536}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d1b98a318adf2c4088e09e8b56a7736, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2764516648824388536
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -507,8 +518,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4727059873169485225, guid: 2e664d50c985cc340ba649cd7115ebb6, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8458511237139069052, guid: 2e664d50c985cc340ba649cd7115ebb6, type: 3}
+      propertyPath: gameManager
+      value: 
+      objectReference: {fileID: 3782116795470502084}
+    - target: {fileID: 8458511237139069052, guid: 2e664d50c985cc340ba649cd7115ebb6, type: 3}
+      propertyPath: orderPrefab
+      value: 
+      objectReference: {fileID: 3525759935877214710, guid: cbaaf86690fd68f49b7dc390b3d8b26d, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -554,14 +573,38 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
+    - target: {fileID: 7356149056711866469, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
+      propertyPath: gameManager
+      value: 
+      objectReference: {fileID: 3782116795470502084}
+    - target: {fileID: 7356149056711866469, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
+      propertyPath: initialTimeInSeconds
+      value: 300
+      objectReference: {fileID: 0}
+    - target: {fileID: 9101548384978308940, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
+      propertyPath: gameMonth
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 9101548384978308940, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
       propertyPath: endGameCanvas
       value: 
       objectReference: {fileID: 1565258227934248119}
     - target: {fileID: 9101548384978308940, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
+      propertyPath: endGameManager
+      value: 
+      objectReference: {fileID: 1565258227934248120}
+    - target: {fileID: 9101548384978308940, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
       propertyPath: dragEventSystem
       value: 
       objectReference: {fileID: 554271878}
+    - target: {fileID: 9101548384978308940, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
+      propertyPath: currentLevelRecipes.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 9101548384978308940, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
+      propertyPath: 'currentLevelRecipes.Array.data[2]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 8e72cfceebe07cc42beb48719fe62157, type: 2}
     - target: {fileID: 9137102876360738173, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
       propertyPath: m_Pivot.x
       value: 0

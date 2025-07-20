@@ -13,13 +13,6 @@ public abstract class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler
     [Tooltip("Скорость изменения размера (чем больше, тем быстрее)")]
     [SerializeField] protected float scaleSpeed = 5f;
     
-    [Tooltip("Делать ли объект полупрозрачным при перетаскивании")]
-    [SerializeField] protected bool enableAlphaOnDrag = true;
-    
-    [Tooltip("Прозрачность объекта во время перетаскивания (0 = полностью прозрачный, 1 = полностью непрозрачный)")]
-    [Range(0f, 1f)]
-    [SerializeField] protected float dragAlpha = 0.8f;
-    
     protected bool isDragging = false;
     protected Vector2 offset;
     protected Canvas canvas;
@@ -80,11 +73,7 @@ public abstract class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler
         // Вычисляем смещение от позиции объекта до позиции мыши
         offset = (Vector2)rectTransform.localPosition - localPoint;
         
-        // Делаем объект полупрозрачным во время перетаскивания (если включено)
-        if (enableAlphaOnDrag)
-        {
-            canvasGroup.alpha = dragAlpha;
-        }
+
         
         // Увеличиваем размер объекта (если включено)
         if (enableScaleOnDrag)
@@ -125,9 +114,6 @@ public abstract class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler
     {
         // Заканчиваем перетаскивание
         isDragging = false;
-        
-        // Возвращаем полную прозрачность
-        canvasGroup.alpha = 1f;
         
         // Возвращаем нормальный размер объекта (если было включено увеличение)
         // Но только если объект не находится на полке
