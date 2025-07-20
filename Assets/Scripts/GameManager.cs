@@ -1199,6 +1199,20 @@ public class GameManager : MonoBehaviour
             gameTimer.StopTimer();
         }
         
+        // Запускаем корутину с задержкой для плавного перехода
+        StartCoroutine(ShowEndGameUIWithDelay());
+    }
+    
+    // Корутина для показа экрана окончания игры с задержкой
+    private System.Collections.IEnumerator ShowEndGameUIWithDelay()
+    {
+        Debug.Log("GameManager: Даем игроку 5 секунд на отдых...");
+        
+        // Ждем 5 секунд
+        yield return new WaitForSeconds(5f);
+        
+        Debug.Log("GameManager: Показываем экран окончания игры после задержки");
+        
         // Отключаем drag'n'drop
         DisableDragDrop();
         
