@@ -822,7 +822,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4575201999027360949}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 9101548384978308940}
+        m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
+        m_MethodName: ShowEndGameUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &4146485270669290301
 GameObject:
   m_ObjectHideFlags: 0
@@ -2235,6 +2247,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   initialTimeInSeconds: 300
   timerText: {fileID: 6655187569500357871}
+  gameManager: {fileID: 9101548384978308940}
   currentTime: 0
   isRunning: 0
 --- !u!1 &6790501628836481044
@@ -2494,24 +2507,39 @@ MonoBehaviour:
   paperSpawner: {fileID: 3291137925979971677}
   recipeManager: {fileID: 4751114390953767534}
   calendar: {fileID: 1289597283781666209}
-  currentLevelRecipes:
-  - {fileID: 11400000, guid: 3b30cff1df94fc84f8b44c9df340076b, type: 2}
-  - {fileID: 11400000, guid: 8e72cfceebe07cc42beb48719fe62157, type: 2}
+  endGameCanvas: {fileID: 0}
+  endGameManager: {fileID: 0}
+  currentLevel: 0
+  levels:
+  - recipes:
+    - {fileID: 11400000, guid: 8e72cfceebe07cc42beb48719fe62157, type: 2}
+    - {fileID: 11400000, guid: 3b30cff1df94fc84f8b44c9df340076b, type: 2}
+  - recipes:
+    - {fileID: 11400000, guid: 6ff9d96a3b396b9479573cb2bad56780, type: 2}
+    - {fileID: 11400000, guid: 8e72cfceebe07cc42beb48719fe62157, type: 2}
+  - recipes:
+    - {fileID: 11400000, guid: 8e72cfceebe07cc42beb48719fe62157, type: 2}
+    - {fileID: 11400000, guid: 8e72cfceebe07cc42beb48719fe62157, type: 2}
+  currentLevelRecipes: []
   orderPrefab: {fileID: 3525759935877214710, guid: cbaaf86690fd68f49b7dc390b3d8b26d, type: 3}
   orderCanvas: {fileID: 2499987238502863682}
   orderSpawnPosition: {fileID: 7002039013050706128}
   orderOffsetX: 200
+  orderCount: 0
   createCharacterOnStart: 1
   chooseOrderMode: 0
   currentCharacter: {fileID: 0}
   currentPaper: {fileID: 0}
   initialQueue: []
   createQueueOnStart: 1
-  gameMonth: 4
+  gameMonth: 3
   gameDay: 14
   useRealDate: 0
   addTimerPerfect: 120
   addTimerMistake: 30
+  completedOrdersCount: 0
+  totalOrdersCount: 0
+  endGameTriggered: 0
 --- !u!1 &7981466690834870915
 GameObject:
   m_ObjectHideFlags: 0
