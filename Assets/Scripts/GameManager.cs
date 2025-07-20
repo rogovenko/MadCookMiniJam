@@ -79,6 +79,13 @@ public class GameManager : MonoBehaviour
     [Tooltip("Использовать реальную дату или игровую")]
     [SerializeField] private bool useRealDate = true;
     
+    [Header("Настройки таймера")]
+    [Tooltip("Время добавляемое за правильное действие")]
+    [SerializeField] private float addTimerPerfect = 120f;
+    
+    [Tooltip("Время добавляемое за ошибку")]
+    [SerializeField] private float addTimerMistake = 30f;
+    
     private System.DateTime gameCurrentDate;
     
     void Start()
@@ -364,15 +371,11 @@ public class GameManager : MonoBehaviour
     // Проверить, просрочен ли срок годности относительно игровой даты
     public bool IsExpiryDateExpired(int expiryMonth, int expiryDay)
     {
+        // Создаем дату срока годности в текущем году
         System.DateTime expiryDate = new System.DateTime(gameCurrentDate.Year, expiryMonth, expiryDay);
         
-        // Если дата в прошлом году, добавляем год
-        if (expiryDate < gameCurrentDate)
-        {
-            expiryDate = expiryDate.AddYears(1);
-        }
-        
-        return expiryDate < gameCurrentDate;
+        // Если дата срока годности раньше или равна игровой дате, то продукт просрочен
+        return expiryDate <= gameCurrentDate;
     }
     
     // Обновить календарь из игровой даты
@@ -557,14 +560,14 @@ public class GameManager : MonoBehaviour
         {
             if (recipe != null && !string.IsNullOrEmpty(recipe.recipeName))
             {
-                // Создаем заказ с названием рецепта
-                CreateOrder(recipe.recipeName);
+                // Создаем заказ с рецептом
+                CreateOrder(recipe);
             }
         }
     }
     
     // Вспомогательный метод для создания заказа
-    private void CreateOrder(string recipeName)
+    private void CreateOrder(RecipeData recipe)
     {
         // Проверки уже выполнены в InitRecipes()
         
@@ -597,12 +600,12 @@ public class GameManager : MonoBehaviour
             orderObject.transform.position = spawnPosition;
         }
         
-        // Настраиваем текст заказа (если есть компонент Order)
+        // Настраиваем заказ (если есть компонент Order)
         Order orderComponent = orderObject.GetComponent<Order>();
         if (orderComponent != null)
         {
             // Используем корутину чтобы дождаться Start()
-            StartCoroutine(SetOrderTextAfterStart(orderComponent, recipeName));
+            StartCoroutine(SetOrderAfterStart(orderComponent, recipe));
         }
         else
         {
@@ -610,14 +613,15 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    // Корутина для установки текста заказа после Start()
-    private System.Collections.IEnumerator SetOrderTextAfterStart(Order orderComponent, string recipeName)
+    // Корутина для установки заказа после Start()
+    private System.Collections.IEnumerator SetOrderAfterStart(Order orderComponent, RecipeData recipe)
     {
         // Ждем один кадр чтобы Start() успел выполниться
         yield return null;
         
-        // Теперь устанавливаем текст
-        orderComponent.SetOrderText(recipeName);
+        // Устанавливаем рецепт и текст заказа
+        orderComponent.SetOrderRecipe(recipe);
+        orderComponent.SetOrderText(recipe.recipeName);
     }
     
     // Получить количество текущих заказов (для вычисления оффсета)
@@ -793,8 +797,10 @@ public class GameManager : MonoBehaviour
                 // Запускаем спавн бумаг
                 if (paperSpawner != null)
                 {
+                    string paperText = characterComponent.GetFullTextInfo();
+
                     // Создаем бумажку и сохраняем ссылку на неё
-                    currentPaper = paperSpawner.SpawnPaper();
+                    currentPaper = paperSpawner.SpawnPaper(paperText);
                 }
                 else
                 {
@@ -974,6 +980,32 @@ public class GameManager : MonoBehaviour
         }
         
         Debug.Log($"GameManager: Проверяем заказ '{order.name}'");
+        
+        // Сначала проверяем правильность собранных ингредиентов
+        bool ingredientsCorrect = order.CheckIngredientsCorrectness();
+        if (!ingredientsCorrect)
+        {
+            Debug.LogWarning("GameManager: Ингредиенты собраны неправильно! Проверка заказа прервана.");
+            Debug.Log($"GameManager: Детали проверки ингредиентов:\n{order.GetIngredientsCheckDetails()}");
+            
+            // Спавним бумагу с предупреждением
+            if (paperSpawner != null)
+            {
+                // Получаем название рецепта для более информативного сообщения
+                RecipeData recipe = order.GetOrderRecipe();
+                string recipeName = recipe != null ? recipe.recipeName : "Unknown Recipe";
+                string warningText = $"Order '{recipeName}' assembled incorrectly. Await consequences!";
+                currentPaper = paperSpawner.SpawnPaper(warningText);
+            }
+            else
+            {
+                Debug.LogError("GameManager: PaperSpawner не назначен! Не удалось создать предупреждение.");
+            }
+            
+            return;
+        }
+        
+        Debug.Log("GameManager: Ингредиенты собраны правильно, продолжаем проверку...");
         Debug.Log($"  - Количество добавленных персонажей: {order.GetAddedCharactersCount()}");
         Debug.Log($"  - Количество наклеек: {order.GetActiveStickerCount()}");
         
@@ -982,22 +1014,27 @@ public class GameManager : MonoBehaviour
         if (addedCharacters.Count > 0)
         {
             Debug.Log("  - Добавленные персонажи:");
+            
+            int vegetablesWithErrors = 0; // Количество овощей с ошибками или дефектами
+            
             foreach (CharInfo charInfo in addedCharacters)
             {
                 Debug.Log($"    * {charInfo.name} ({charInfo.GetVarietyDisplayName()} из {charInfo.GetOriginDisplayName()})");
+                
+                bool hasErrors = false; // Есть ли у этого овоща ошибки или дефекты
                 
                 // Проверяем дефекты
                 if (charInfo.HasDefects())
                 {
                     Debug.Log($"      Дефекты: {string.Join(", ", charInfo.defects)}");
+                    hasErrors = true;
                 }
                 else
                 {
                     Debug.Log("      Дефектов нет");
                 }
                 
-                // Проверяем ошибки в данных (если у нас есть доступ к Character)
-                // Здесь мы можем проверить ошибки только на основе CharInfo
+                // Проверяем ошибки в данных
                 List<string> dataErrors = GetDataErrorsFromCharInfo(charInfo);
                 if (dataErrors.Count > 0)
                 {
@@ -1006,20 +1043,63 @@ public class GameManager : MonoBehaviour
                     {
                         Debug.Log($"        - {error}");
                     }
+                    hasErrors = true;
                 }
                 else
                 {
                     Debug.Log("      Ошибок в данных нет");
                 }
+                
+                // Если у овоща есть хотя бы одна ошибка или дефект, считаем его
+                if (hasErrors)
+                {
+                    vegetablesWithErrors++;
+                }
+            }
+            
+            // Рассчитываем время на основе овощей с ошибками
+            float baseTime = addTimerPerfect; // 120 секунд за идеальный заказ
+            float penaltyPerVegetable = addTimerMistake; // 30 секунд за каждый овощ с ошибками/дефектами
+            float finalTime = Mathf.Max(0f, baseTime - (vegetablesWithErrors * penaltyPerVegetable));
+            
+            Debug.Log($"GameManager: Овощей с ошибками/дефектами: {vegetablesWithErrors}");
+            Debug.Log($"GameManager: Базовое время: {baseTime}с, Штраф за овощ с ошибками: {penaltyPerVegetable}с");
+            Debug.Log($"GameManager: Финальное время: {finalTime}с");
+            
+            // Добавляем время к таймеру
+            AddTimeToTimer(finalTime);
+            
+            // Спавним бумагу с результатом
+            if (paperSpawner != null)
+            {
+                RecipeData recipe = order.GetOrderRecipe();
+                string recipeName = recipe != null ? recipe.recipeName : "Unknown Recipe";
+                string resultText;
+                
+                if (vegetablesWithErrors == 0)
+                {
+                    resultText = $"Order '{recipeName}' assembled perfectly +{(int)finalTime} seconds";
+                }
+                else if (finalTime > 0)
+                {
+                    resultText = $"Order '{recipeName}' assembled with errors or defects +{(int)finalTime} seconds";
+                }
+                else
+                {
+                    resultText = $"Order '{recipeName}' assembled with errors or defects, no additional time awarded";
+                }
+                
+                currentPaper = paperSpawner.SpawnPaper(resultText);
+            }
+            else
+            {
+                Debug.LogError("GameManager: PaperSpawner не назначен! Не удалось создать результат.");
             }
         }
         else
         {
             Debug.Log("  - Персонажи не добавлены");
         }
-        
-        // Здесь можно добавить логику проверки заказа
-        // Например, сравнение с рецептами, подсчет очков и т.д.
     }
     
     // Вспомогательный метод для проверки ошибок в данных CharInfo
@@ -1032,7 +1112,7 @@ public class GameManager : MonoBehaviour
         // Проверяем срок годности относительно игровой даты
         if (IsExpiryDateExpired(charInfo.expiryMonth, charInfo.expiryDay))
         {
-            errors.Add($"Просроченный срок годности: {charInfo.GetExpiryDateString()} (игровая дата: {GetGameDateString()})");
+            errors.Add($"Expired: {charInfo.GetExpiryDateString()} (Game date: {GetGameDateString()})");
         }
         
         // Проверяем соответствие сорта и места происхождения

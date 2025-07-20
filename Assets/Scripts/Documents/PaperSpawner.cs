@@ -15,7 +15,7 @@ public class PaperSpawner : MonoBehaviour
     [Tooltip("Случайное смещение при спауне (разброс)")]
     public float randomOffset = 30f;
 
-    public GameObject SpawnPaper()
+    public GameObject SpawnPaper(string paperText = "")
     {
         if (paperPrefab == null)
         {
@@ -50,6 +50,34 @@ public class PaperSpawner : MonoBehaviour
             paperObj.transform.localPosition = finalPosition;
         }
         
+        // Устанавливаем текст на бумаге, если он передан
+        if (!string.IsNullOrEmpty(paperText))
+        {
+            SetPaperText(paperObj, paperText);
+        }
+        
         return paperObj;
+    }
+    
+    // Перегрузка для обратной совместимости (без текста)
+    public GameObject SpawnPaper()
+    {
+        return SpawnPaper("");
+    }
+    
+    // Вспомогательный метод для установки текста на бумаге
+    private void SetPaperText(GameObject paperObj, string text)
+    {
+        // Получаем компонент Paper
+        Paper paperComponent = paperObj.GetComponent<Paper>();
+        if (paperComponent != null)
+        {
+            paperComponent.SetPaperText(text);
+            Debug.Log($"PaperSpawner: Установлен текст на бумаге: '{text}'");
+        }
+        else
+        {
+            Debug.LogWarning("PaperSpawner: На созданной бумаге отсутствует компонент Paper!");
+        }
     }
 } 

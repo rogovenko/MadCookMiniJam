@@ -119,7 +119,7 @@ public class CharInfo
     // Метод для проверки, есть ли дефекты
     public bool HasDefects()
     {
-        return defects != null && defects.Count > 0;
+        return defects != null && defects.Count > 0 && defects[0] != CharacterDefect.None;
     }
     
     // Метод для добавления дефекта

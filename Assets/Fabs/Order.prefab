@@ -40,7 +40,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -35.000004}
+  m_AnchoredPosition: {x: 0, y: -52.9}
   m_SizeDelta: {x: 150, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7921403591384678759
@@ -265,7 +265,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 264.1, y: 70.7}
-  m_SizeDelta: {x: 150, y: 100}
+  m_SizeDelta: {x: 300, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7003748628936053204
 CanvasRenderer:
@@ -321,6 +321,7 @@ MonoBehaviour:
   cucumberSticker: {fileID: 21300000, guid: ad542011c07058640a19d7b9fd6e0528, type: 3}
   eggplantSticker: {fileID: 21300000, guid: bf9bec9c854b1834cbf5fc08ec03e990, type: 3}
   carrotSticker: {fileID: 21300000, guid: e7d7ba5d94a2cea4ba3db4fb679e650a, type: 3}
+  addedChars: []
 --- !u!114 &8739358322555047067
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -610,8 +611,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.5827, y: 14.1542}
-  m_SizeDelta: {x: 135, y: 69}
+  m_AnchoredPosition: {x: -1.0791, y: 24.081}
+  m_SizeDelta: {x: 282.909, y: 88.8535}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &707552342405102294
 CanvasRenderer:
@@ -668,12 +669,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 12
+  m_fontSize: 32
   m_fontSizeBase: 12
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 0
-  m_fontSizeMax: 18
+  m_fontSizeMax: 32
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512

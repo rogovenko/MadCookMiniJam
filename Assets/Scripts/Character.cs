@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Text;
 
 public class Character : MonoBehaviour
 {
@@ -445,12 +446,43 @@ public class Character : MonoBehaviour
         System.DateTime currentDate = System.DateTime.Now;
         System.DateTime expiryDate = new System.DateTime(currentDate.Year, charInfo.expiryMonth, charInfo.expiryDay);
         
-        // Если дата в прошлом году, добавляем год
-        if (expiryDate < currentDate)
+        // Если дата срока годности раньше или равна текущей дате, то продукт просрочен
+        return expiryDate <= currentDate;
+    }
+    
+    // Получить полную текстовую информацию о персонаже
+    public string GetFullTextInfo()
+    {
+        if (characterInfo == null)
         {
-            expiryDate = expiryDate.AddYears(1);
+            return "Character information unavailable";
         }
         
-        return expiryDate < currentDate;
+        StringBuilder info = new System.Text.StringBuilder();
+        
+        // Имя овоща
+        info.AppendLine($"Name: {characterInfo.name}");
+        
+        // Срок годности
+        info.AppendLine($"Expiry Date: {characterInfo.GetExpiryDateString()}");
+        
+        // Сорт овоща
+        info.AppendLine($"Variety: {characterInfo.GetVarietyDisplayName()}");
+        
+        // Ферма производства
+        info.AppendLine($"Origin: {characterInfo.GetOriginDisplayName()}");
+        
+        // Ошибки в данных (если есть)
+        // List<string> errors = GetCharacterErrors();
+        // if (errors.Count > 0)
+        // {
+        //     info.AppendLine("Data Errors:");
+        //     foreach (string error in errors)
+        //     {
+        //         info.AppendLine($"  - {error}");
+        //     }
+        // }
+        
+        return info.ToString();
     }
 } 

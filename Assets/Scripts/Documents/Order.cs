@@ -48,6 +48,10 @@ public class Order : Paper
     [Tooltip("Список CharInfo добавленных в заказ персонажей")]
     [SerializeField] private List<CharInfo> addedChars = new List<CharInfo>();
     
+    [Header("Рецепт заказа")]
+    [Tooltip("Рецепт для этого заказа")]
+    [SerializeField] private RecipeData orderRecipe;
+    
     private Dictionary<CharacterType, Sprite> stickerSprites = new Dictionary<CharacterType, Sprite>();
     
     protected override void Start()
@@ -253,6 +257,149 @@ public class Order : Paper
     public int GetAddedCharactersCount()
     {
         return addedChars.Count;
+    }
+    
+    // Установить рецепт для заказа
+    public void SetOrderRecipe(RecipeData recipe)
+    {
+        orderRecipe = recipe;
+        Debug.Log($"Order: Установлен рецепт '{recipe.recipeName}' для заказа");
+    }
+    
+    // Получить рецепт заказа
+    public RecipeData GetOrderRecipe()
+    {
+        return orderRecipe;
+    }
+    
+    // Проверить правильность собранных ингредиентов
+    public bool CheckIngredientsCorrectness()
+    {
+        if (orderRecipe == null)
+        {
+            Debug.LogWarning("Order: Рецепт не установлен для заказа!");
+            return false;
+        }
+        
+        // Подсчитываем количество каждого типа ингредиентов в добавленных персонажах
+        Dictionary<CharacterType, int> addedIngredients = new Dictionary<CharacterType, int>();
+        
+        foreach (CharInfo charInfo in addedChars)
+        {
+            if (charInfo != null)
+            {
+                CharacterType vegType = charInfo.characterType;
+                if (addedIngredients.ContainsKey(vegType))
+                {
+                    addedIngredients[vegType]++;
+                }
+                else
+                {
+                    addedIngredients[vegType] = 1;
+                }
+            }
+        }
+        
+        // Проверяем, соответствует ли количество добавленных ингредиентов рецепту
+        foreach (RecipeIngredient requiredIngredient in orderRecipe.ingredients)
+        {
+            CharacterType requiredType = requiredIngredient.ingredientType;
+            int requiredAmount = requiredIngredient.amount;
+            
+            // Проверяем, есть ли нужный тип ингредиента
+            if (!addedIngredients.ContainsKey(requiredType))
+            {
+                Debug.Log($"Order: Отсутствует ингредиент {requiredType} (требуется: {requiredAmount})");
+                return false;
+            }
+            
+            // Проверяем количество
+            int addedAmount = addedIngredients[requiredType];
+            if (addedAmount != requiredAmount)
+            {
+                Debug.Log($"Order: Неправильное количество {requiredType} (добавлено: {addedAmount}, требуется: {requiredAmount})");
+                return false;
+            }
+        }
+        
+        // Проверяем, нет ли лишних ингредиентов
+        foreach (var kvp in addedIngredients)
+        {
+            CharacterType addedType = kvp.Key;
+            int addedAmount = kvp.Value;
+            
+            // Ищем этот тип в рецепте
+            bool foundInRecipe = false;
+            foreach (RecipeIngredient requiredIngredient in orderRecipe.ingredients)
+            {
+                if (requiredIngredient.ingredientType == addedType)
+                {
+                    foundInRecipe = true;
+                    break;
+                }
+            }
+            
+            if (!foundInRecipe)
+            {
+                Debug.Log($"Order: Лишний ингредиент {addedType} (добавлено: {addedAmount})");
+                return false;
+            }
+        }
+        
+        Debug.Log("Order: Все ингредиенты собраны правильно!");
+        return true;
+    }
+    
+    // Получить детальную информацию о проверке ингредиентов
+    public string GetIngredientsCheckDetails()
+    {
+        if (orderRecipe == null)
+        {
+            return "Рецепт не установлен";
+        }
+        
+        // Подсчитываем количество каждого типа ингредиентов в добавленных персонажах
+        Dictionary<CharacterType, int> addedIngredients = new Dictionary<CharacterType, int>();
+        
+        foreach (CharInfo charInfo in addedChars)
+        {
+            if (charInfo != null)
+            {
+                CharacterType vegType = charInfo.characterType;
+                if (addedIngredients.ContainsKey(vegType))
+                {
+                    addedIngredients[vegType]++;
+                }
+                else
+                {
+                    addedIngredients[vegType] = 1;
+                }
+            }
+        }
+        
+        string details = $"Рецепт: {orderRecipe.recipeName}\n";
+        details += $"Требуется: {orderRecipe.GetIngredientsList()}\n";
+        details += $"Добавлено: ";
+        
+        if (addedIngredients.Count == 0)
+        {
+            details += "ничего";
+        }
+        else
+        {
+            int index = 0;
+            foreach (var kvp in addedIngredients)
+            {
+                details += $"{kvp.Key} x{kvp.Value}";
+                if (index < addedIngredients.Count - 1)
+                {
+                    details += ", ";
+                }
+                index++;
+            }
+        }
+        
+        return details;
     }
     
     // Установить текст заказа

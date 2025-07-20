@@ -60,6 +60,12 @@ public class Paper : Draggable
         }
     }
     
+    // Метод для установки текста бумаги (алиас для SetContent)
+    public void SetPaperText(string text)
+    {
+        SetContent(text);
+    }
+    
     // Переопределяем методы для дополнительной логики
     protected override void OnStartDrag()
     {
