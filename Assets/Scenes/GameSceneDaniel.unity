@@ -135,6 +135,10 @@ PrefabInstance:
       propertyPath: endGameCanvas
       value: 
       objectReference: {fileID: 755617829}
+    - target: {fileID: 9101548384978308940, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
+      propertyPath: dragEventSystem
+      value: 
+      objectReference: {fileID: 1389710562}
     - target: {fileID: 9137102876360738173, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -475,6 +479,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 260305d7bcc35c74cb7cfca74cab565b, type: 3}
+--- !u!114 &1389710562 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4561625993138772643, guid: 260305d7bcc35c74cb7cfca74cab565b, type: 3}
+  m_PrefabInstance: {fileID: 1389710561}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cda7f006dd04174e8cdc13bae5646cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
