@@ -28,6 +28,9 @@ public class GameManager : MonoBehaviour
     [Tooltip("Календарь")]
     public Calendar calendar;
     
+    [Tooltip("Игра с пальцами")]
+    public HandsGame handsGame;
+    
     [Header("End Game UI")]
     [Tooltip("Canvas для экрана окончания игры")]
     [SerializeField] private Canvas endGameCanvas;
@@ -212,7 +215,7 @@ public class GameManager : MonoBehaviour
             {
                 // Отключаем EndGameCanvas по умолчанию
                 // TODO вернуть
-                // endGameCanvas.gameObject.SetActive(false);
+                endGameCanvas.gameObject.SetActive(false);
             }
             else
             {
@@ -1353,7 +1356,7 @@ public class GameManager : MonoBehaviour
         if (endGameCanvas != null)
         {
             // TODO вернуть
-            // endGameCanvas.gameObject.SetActive(false);
+            endGameCanvas.gameObject.SetActive(false);
             Debug.Log("GameManager: EndGameCanvas деактивирован");
         }
     }
@@ -1554,6 +1557,20 @@ public class GameManager : MonoBehaviour
             return levels[currentLevel];
         }
         return null;
+    }
+    
+    // Скрыть палец
+    public void HideFinger(bool isLeftHand, int fingerIndex)
+    {
+        if (handsGame != null)
+        {
+            handsGame.HideFinger(isLeftHand, fingerIndex);
+            Debug.Log($"GameManager: Скрыт палец через GameManager. Рука: {(isLeftHand ? "левая" : "правая")}, палец: {fingerIndex}");
+        }
+        else
+        {
+            Debug.LogWarning("GameManager: Компонент HandsGame не найден!");
+        }
     }
     
     private void OnDestroy()

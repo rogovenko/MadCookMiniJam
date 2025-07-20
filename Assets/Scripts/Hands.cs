@@ -28,12 +28,20 @@ public class Hands : MonoBehaviour
     [Tooltip("Автоматически активировать кнопки при старте")]
     [SerializeField] private bool activateButtonsOnStart = true;
     
+    [Header("End Game Manager")]
+    [Tooltip("Ссылка на EndGameManager")]
+    [SerializeField] private EndGameManager endGameManager;
+    
     // Состояние пальцев (true = отрезан, false = целый)
     private bool[] leftHandFingerStates = new bool[5];
     private bool[] rightHandFingerStates = new bool[5];
     
     void Start()
     {
+        // Получаем EndGameManager если не назначен
+        if (endGameManager == null)
+            endGameManager = FindObjectOfType<EndGameManager>();
+        
         // Инициализируем состояние пальцев (все целые)
         for (int i = 0; i < 5; i++)
         {
@@ -132,6 +140,17 @@ public class Hands : MonoBehaviour
         
         // Обновляем состояние
         fingerStates[fingerIndex] = true;
+        
+        // Уведомляем EndGameManager об отрезанном пальце
+        if (endGameManager != null)
+        {
+            endGameManager.HideFinger(isLeftHand, fingerIndex);
+            Debug.Log($"Hands: Уведомлен EndGameManager об отрезанном пальце. Рука: {(isLeftHand ? "левая" : "правая")}, палец: {fingerIndex}");
+        }
+        else
+        {
+            Debug.LogWarning("Hands: EndGameManager не найден!");
+        }
         
         Debug.Log($"Hands: Отрезан палец! Рука: {(isLeftHand ? "левая" : "правая")}, палец: {fingerIndex}");
     }
