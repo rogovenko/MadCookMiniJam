@@ -26,9 +26,23 @@ public class EndGameManager : MonoBehaviour
     [Tooltip("Кнопка перехода на следующий уровень")]
     [SerializeField] private Button nextLevelButton;
     
+    [Header("Управление уровнями")]
+    [Tooltip("Текущий уровень")]
+    [SerializeField] private int currentLevel = 1;
+    [Tooltip("Максимальное количество уровней")]
+    [SerializeField] private int maxLevels = 5;
+    
     [Header("Игровые объекты")]
     [Tooltip("Нож в EndGame")]
     [SerializeField] private Knife endGameKnife;
+    
+    [Header("Экраны")]
+    [Tooltip("Экран окончания игры (Game Over)")]
+    [SerializeField] private GameObject gameOverScreen;
+    
+    [Header("UI Тексты Game Over")]
+    [Tooltip("Сообщение Game Over")]
+    [SerializeField] private TMPro.TextMeshProUGUI gameOverMessage;
     
     [Header("Статистика заказов")]
     [Tooltip("Количество проваленных заказов")]
@@ -52,6 +66,9 @@ public class EndGameManager : MonoBehaviour
         
         // Инициализируем нож
         InitializeEndGameKnife();
+        
+        // Инициализируем GameOverScreen
+        InitializeGameOverScreen();
         
         // Скрываем UI по умолчанию
         // TODO вернуть
@@ -198,6 +215,15 @@ public class EndGameManager : MonoBehaviour
         // Здесь можно добавить дополнительную логику для EndGameManager
         // Например, обновить UI, показать анимацию, и т.д.
         
+        // Проверяем количество оставшихся пальцев после отрезания
+        int remainingFingers = GetRemainingFingersCount();
+        
+        if (remainingFingers <= 0)
+        {
+            Debug.LogWarning("EndGameManager: Не осталось пальцев! Показываем Game Over экран");
+            ShowGameOverScreen(false); // false = поражение (потеряны все пальцы)
+        }
+        
         Debug.Log($"EndGameManager: Обработано скрытие пальца. Рука: {(isLeftHand ? "левая" : "правая")}, палец: {fingerIndex}");
     }
     
@@ -206,16 +232,42 @@ public class EndGameManager : MonoBehaviour
     {
         if (gameManager != null)
         {
-            Debug.Log("EndGameManager: Переходим на следующий уровень");
+            Debug.Log($"EndGameManager: Переходим на следующий уровень. Текущий уровень: {currentLevel}, Максимум: {maxLevels}");
             
             // Останавливаем нож перед переходом на следующий уровень
             StopEndGameKnife();
             
-            // Переходим на следующий уровень через GameManager
-            gameManager.NextLevel();
+            // Проверяем количество оставшихся пальцев
+            int remainingFingers = GetRemainingFingersCount();
             
-            // Скрываем экран окончания игры
-            HideEndGameScreen();
+            if (remainingFingers > 0)
+            {
+                // Проверяем, остались ли еще уровни
+                if (currentLevel < maxLevels)
+                {
+                    Debug.Log($"EndGameManager: Осталось пальцев: {remainingFingers}. Переходим на следующий уровень");
+                    
+                    // Увеличиваем номер уровня
+                    currentLevel++;
+                    
+                    // Переходим на следующий уровень через GameManager
+                    gameManager.NextLevel();
+                    
+                    // Скрываем экран окончания игры
+                    HideEndGameScreen();
+                }
+                else
+                {
+                    Debug.Log($"EndGameManager: Достигнут максимальный уровень ({maxLevels})! Показываем экран победы");
+                    
+                    // Показываем GameOverScreen с победой
+                    ShowGameOverScreen(true); // true = победа (прошли все уровни)
+                }
+            }
+            else
+            {
+                Debug.LogWarning("EndGameManager: Нет оставшихся пальцев! Нельзя перейти на следующий уровень");
+            }
         }
         else
         {
@@ -393,5 +445,149 @@ public class EndGameManager : MonoBehaviour
     {
         endGameKnife = knife;
         Debug.Log("EndGameManager: Нож в EndGame установлен");
+    }
+    
+    // Получить количество оставшихся пальцев
+    private int GetRemainingFingersCount()
+    {
+        if (gameManager != null && gameManager.handsGame != null)
+        {
+            // Получаем общее количество пальцев (10) и вычитаем количество скрытых
+            int totalFingers = 10;
+            int hiddenFingers = gameManager.handsGame.GetHiddenFingersCount();
+            int remainingFingers = totalFingers - hiddenFingers;
+            
+            Debug.Log($"EndGameManager: Всего пальцев: {totalFingers}, скрыто: {hiddenFingers}, осталось: {remainingFingers}");
+            return remainingFingers;
+        }
+        else
+        {
+            Debug.LogWarning("EndGameManager: GameManager или HandsGame не найден! Не удалось получить количество пальцев");
+            return 0; // Возвращаем 0 если не можем получить информацию
+        }
+    }
+    
+    // Инициализировать GameOverScreen
+    private void InitializeGameOverScreen()
+    {
+        if (gameOverScreen == null)
+        {
+            Debug.LogWarning("EndGameManager: GameOverScreen не назначен!");
+            return;
+        }
+        
+        // Скрываем GameOverScreen по умолчанию
+        gameOverScreen.SetActive(false);
+        
+        Debug.Log("EndGameManager: GameOverScreen инициализирован и скрыт");
+    }
+    
+    // Показать GameOverScreen
+    public void ShowGameOverScreen(bool isWin)
+    {
+        if (gameOverScreen == null)
+        {
+            Debug.LogError("EndGameManager: GameOverScreen не назначен! Не удалось показать экран Game Over");
+            return;
+        }
+        
+        // Устанавливаем сообщение в зависимости от результата
+        SetGameOverMessage(isWin);
+        
+        gameOverScreen.SetActive(true);
+        Debug.Log($"EndGameManager: Показан экран Game Over. Результат: {(isWin ? "Победа" : "Поражение")}");
+    }
+    
+    // Скрыть GameOverScreen
+    public void HideGameOverScreen()
+    {
+        if (gameOverScreen == null)
+        {
+            Debug.LogWarning("EndGameManager: GameOverScreen не назначен!");
+            return;
+        }
+        
+        gameOverScreen.SetActive(false);
+        Debug.Log("EndGameManager: Скрыт экран Game Over");
+    }
+    
+    // Получить GameOverScreen
+    public GameObject GetGameOverScreen()
+    {
+        return gameOverScreen;
+    }
+    
+    // Установить GameOverScreen
+    public void SetGameOverScreen(GameObject screen)
+    {
+        gameOverScreen = screen;
+        Debug.Log("EndGameManager: GameOverScreen установлен");
+    }
+    
+    // Установить сообщение Game Over
+    private void SetGameOverMessage(bool isWin)
+    {
+        if (gameOverMessage == null)
+        {
+            Debug.LogWarning("EndGameManager: GameOverMessage не назначен!");
+            return;
+        }
+        
+        if (isWin)
+        {
+            gameOverMessage.text = "Bravo! You survived!";
+            Debug.Log("EndGameManager: Установлено сообщение победы");
+        }
+        else
+        {
+            gameOverMessage.text = "You lost all fingers!";
+            Debug.Log("EndGameManager: Установлено сообщение поражения");
+        }
+    }
+    
+    // Публичный метод для принудительного обновления сообщения
+    public void ForceUpdateGameOverMessage(bool isWin)
+    {
+        SetGameOverMessage(isWin);
+    }
+    
+    // Методы для управления уровнями
+    
+    // Получить текущий уровень
+    public int GetCurrentLevel()
+    {
+        return currentLevel;
+    }
+    
+    // Установить текущий уровень
+    public void SetCurrentLevel(int level)
+    {
+        currentLevel = Mathf.Max(1, level);
+        Debug.Log($"EndGameManager: Установлен уровень {currentLevel}");
+    }
+    
+    // Получить максимальное количество уровней
+    public int GetMaxLevels()
+    {
+        return maxLevels;
+    }
+    
+    // Установить максимальное количество уровней
+    public void SetMaxLevels(int maxLevel)
+    {
+        maxLevels = Mathf.Max(1, maxLevel);
+        Debug.Log($"EndGameManager: Установлено максимальное количество уровней: {maxLevels}");
+    }
+    
+    // Проверить, остались ли еще уровни
+    public bool HasMoreLevels()
+    {
+        return currentLevel < maxLevels;
+    }
+    
+    // Получить информацию об уровнях
+    public string GetLevelInfo()
+    {
+        return $"Уровень {currentLevel} из {maxLevels}";
     }
 }

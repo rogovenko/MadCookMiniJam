@@ -1278,7 +1278,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5607691516567476778
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1653,7 +1653,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6241813546874624513
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3569,7 +3569,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 50, y: 169.99995}
+  m_AnchoredPosition: {x: -11, y: 170}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &7934569363597586016
@@ -3649,6 +3649,10 @@ MonoBehaviour:
   - recipes:
     - {fileID: 11400000, guid: 8e72cfceebe07cc42beb48719fe62157, type: 2}
     - {fileID: 11400000, guid: 3b30cff1df94fc84f8b44c9df340076b, type: 2}
+    - {fileID: 11400000, guid: 3b30cff1df94fc84f8b44c9df340076b, type: 2}
+    - {fileID: 11400000, guid: 3b30cff1df94fc84f8b44c9df340076b, type: 2}
+    - {fileID: 11400000, guid: 3b30cff1df94fc84f8b44c9df340076b, type: 2}
+    - {fileID: 11400000, guid: 3b30cff1df94fc84f8b44c9df340076b, type: 2}
   - recipes:
     - {fileID: 11400000, guid: 6ff9d96a3b396b9479573cb2bad56780, type: 2}
     - {fileID: 11400000, guid: 8e72cfceebe07cc42beb48719fe62157, type: 2}
@@ -3659,7 +3663,7 @@ MonoBehaviour:
   orderPrefab: {fileID: 3525759935877214710, guid: cbaaf86690fd68f49b7dc390b3d8b26d, type: 3}
   orderCanvas: {fileID: 2499987238502863682}
   orderSpawnPosition: {fileID: 7002039013050706128}
-  orderOffsetX: 200
+  orderOffsetX: 75
   orderCount: 0
   createCharacterOnStart: 1
   chooseOrderMode: 0
@@ -4647,7 +4651,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -133, y: 0.000021935}
+  m_AnchoredPosition: {x: 390.76993, y: -308}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &3291137925979971677
