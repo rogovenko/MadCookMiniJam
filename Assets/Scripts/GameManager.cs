@@ -1124,6 +1124,33 @@ public class GameManager : MonoBehaviour
         return errors;
     }
     
+    // Переключить на сцену окончания игры
+    public void LoadEndGameScene()
+    {
+        Debug.Log("GameManager: Переключение на сцену окончания игры...");
+        
+        // Останавливаем таймер если он активен
+        if (gameTimer != null)
+        {
+            gameTimer.StopTimer();
+        }
+        
+        // Отключаем drag'n'drop
+        DisableDragDrop();
+        
+        // Уничтожаем текущего персонажа если он есть
+        if (currentCharacter != null)
+        {
+            DestroyCurrentCharacter();
+        }
+        
+        // Уничтожаем текущую бумажку если она есть
+        DestroyCurrentPaper();
+        
+        // Загружаем сцену окончания игры
+        UnityEngine.SceneManagement.SceneManager.LoadScene("EndGameScene");
+    }
+    
     private void OnDestroy()
     {
         // Отписываемся от события при уничтожении объекта
