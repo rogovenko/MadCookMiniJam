@@ -11,12 +11,12 @@ public class TastyButton : MonoBehaviour
     [Tooltip("Text компонент кнопки")]
     [SerializeField] private TextMeshProUGUI buttonText;
     
-    [Header("Colors")]
-    [Tooltip("Цвет активного состояния (зеленый)")]
-    [SerializeField] private Color activeColor = Color.green;
+    [Header("Sprites")]
+    [Tooltip("Спрайт активного состояния (CancelUp)")]
+    [SerializeField] private Sprite activeSprite;
     
-    [Tooltip("Цвет неактивного состояния (серый)")]
-    [SerializeField] private Color inactiveColor = Color.gray;
+    [Tooltip("Спрайт неактивного состояния (CancelDown)")]
+    [SerializeField] private Sprite inactiveSprite;
     
     [Header("Texts")]
     [Tooltip("Текст активного состояния")]
@@ -41,6 +41,17 @@ public class TastyButton : MonoBehaviour
             return;
         }
         
+        // Проверяем наличие спрайтов
+        if (activeSprite == null)
+        {
+            Debug.LogWarning("TastyButton: Не назначен активный спрайт (CancelUp)!");
+        }
+        
+        if (inactiveSprite == null)
+        {
+            Debug.LogWarning("TastyButton: Не назначен неактивный спрайт (CancelDown)!");
+        }
+        
         // Добавляем обработчик клика
         button.onClick.AddListener(OnButtonClick);
         
@@ -59,10 +70,10 @@ public class TastyButton : MonoBehaviour
     
     private void UpdateButtonState()
     {
-        // Обновляем цвет
+        // Обновляем спрайт
         if (buttonImage != null)
         {
-            buttonImage.color = isActivated ? activeColor : inactiveColor;
+            buttonImage.sprite = isActivated ? activeSprite : inactiveSprite;
         }
         
         // Обновляем текст
@@ -139,5 +150,37 @@ public class TastyButton : MonoBehaviour
         {
             MakeInactive();
         }
+    }
+    
+    // Установить активный спрайт
+    public void SetActiveSprite(Sprite sprite)
+    {
+        activeSprite = sprite;
+        if (isActivated)
+        {
+            UpdateButtonState();
+        }
+    }
+    
+    // Установить неактивный спрайт
+    public void SetInactiveSprite(Sprite sprite)
+    {
+        inactiveSprite = sprite;
+        if (!isActivated)
+        {
+            UpdateButtonState();
+        }
+    }
+    
+    // Получить текущий активный спрайт
+    public Sprite GetActiveSprite()
+    {
+        return activeSprite;
+    }
+    
+    // Получить текущий неактивный спрайт
+    public Sprite GetInactiveSprite()
+    {
+        return inactiveSprite;
     }
 } 
