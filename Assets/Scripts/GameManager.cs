@@ -25,6 +25,9 @@ public class GameManager : MonoBehaviour
     [Tooltip("Менеджер рецептов")]
     public RecipeManager recipeManager;
     
+    [Tooltip("Календарь")]
+    public Calendar calendar;
+    
     [Header("Рецепты уровня")]
     [Tooltip("Рецепты, которые нужно выполнить на текущем уровне")]
     public List<RecipeData> currentLevelRecipes = new List<RecipeData>();
@@ -63,6 +66,20 @@ public class GameManager : MonoBehaviour
     
     [Tooltip("Создать очередь при старте игры")]
     [SerializeField] private bool createQueueOnStart = true;
+    
+    [Header("Игровая дата")]
+    [Tooltip("Месяц игровой даты")]
+    [Range(1, 12)]
+    [SerializeField] private int gameMonth = System.DateTime.Now.Month;
+    
+    [Tooltip("День игровой даты")]
+    [Range(1, 31)]
+    [SerializeField] private int gameDay = System.DateTime.Now.Day;
+    
+    [Tooltip("Использовать реальную дату или игровую")]
+    [SerializeField] private bool useRealDate = true;
+    
+    private System.DateTime gameCurrentDate;
     
     void Start()
     {
@@ -143,6 +160,16 @@ public class GameManager : MonoBehaviour
             }
         }
         
+        // Проверяем наличие Calendar
+        if (calendar == null)
+        {
+            calendar = FindObjectOfType<Calendar>();
+            if (calendar == null)
+            {
+                Debug.LogWarning("GameManager: Calendar не найден на сцене!");
+            }
+        }
+        
         // Подписываемся на событие готовности очереди
         if (queueManager != null)
         {
@@ -154,6 +181,12 @@ public class GameManager : MonoBehaviour
         {
             gameTimer.OnTimerFinished += OnGameTimerFinished;
         }
+        
+        // Инициализируем игровую дату
+        InitializeGameDate();
+        
+        // Обновляем календарь из игровой даты
+        UpdateCalendarFromGameDate();
         
         // Создаем очередь при старте
         if (createQueueOnStart)
@@ -214,6 +247,161 @@ public class GameManager : MonoBehaviour
         CreateQueueFromVegetableCounts(vegetableCounts);
     }
     
+    // Инициализировать игровую дату
+    private void InitializeGameDate()
+    {
+        if (useRealDate)
+        {
+            gameCurrentDate = System.DateTime.Now;
+        }
+        else
+        {
+            // Используем дату из инспектора (текущий год)
+            int currentYear = System.DateTime.Now.Year;
+            gameCurrentDate = new System.DateTime(currentYear, gameMonth, gameDay);
+        }
+        
+        Debug.Log($"GameManager: Игровая дата установлена на {gameCurrentDate.ToString("dd.MM.yyyy")}");
+    }
+    
+    // Получить текущую игровую дату
+    public System.DateTime GetGameCurrentDate()
+    {
+        return gameCurrentDate;
+    }
+    
+    // Установить игровую дату
+    public void SetGameCurrentDate(System.DateTime newDate)
+    {
+        gameCurrentDate = newDate;
+        Debug.Log($"GameManager: Игровая дата изменена на {gameCurrentDate.ToString("dd.MM.yyyy")}");
+    }
+    
+    // Установить месяц игровой даты
+    public void SetGameMonth(int month)
+    {
+        if (month >= 1 && month <= 12)
+        {
+            gameMonth = month;
+            UpdateGameDateFromInspector();
+            Debug.Log($"GameManager: Месяц игровой даты изменен на {month}");
+        }
+        else
+        {
+            Debug.LogWarning($"GameManager: Некорректный месяц {month}. Должен быть от 1 до 12.");
+        }
+    }
+    
+    // Установить день игровой даты
+    public void SetGameDay(int day)
+    {
+        if (day >= 1 && day <= 31)
+        {
+            gameDay = day;
+            UpdateGameDateFromInspector();
+            Debug.Log($"GameManager: День игровой даты изменен на {day}");
+        }
+        else
+        {
+            Debug.LogWarning($"GameManager: Некорректный день {day}. Должен быть от 1 до 31.");
+        }
+    }
+    
+    // Обновить игровую дату из значений инспектора
+    private void UpdateGameDateFromInspector()
+    {
+        if (!useRealDate)
+        {
+            int currentYear = System.DateTime.Now.Year;
+            gameCurrentDate = new System.DateTime(currentYear, gameMonth, gameDay);
+            Debug.Log($"GameManager: Игровая дата обновлена на {gameCurrentDate.ToString("dd.MM.yyyy")}");
+        }
+    }
+    
+    // Добавить дни к игровой дате
+    public void AddDaysToGameDate(int days)
+    {
+        gameCurrentDate = gameCurrentDate.AddDays(days);
+        Debug.Log($"GameManager: Добавлено {days} дней. Новая дата: {gameCurrentDate.ToString("dd.MM.yyyy")}");
+    }
+    
+    // Добавить месяцы к игровой дате
+    public void AddMonthsToGameDate(int months)
+    {
+        gameCurrentDate = gameCurrentDate.AddMonths(months);
+        Debug.Log($"GameManager: Добавлено {months} месяцев. Новая дата: {gameCurrentDate.ToString("dd.MM.yyyy")}");
+    }
+    
+    // Получить строковое представление игровой даты
+    public string GetGameDateString()
+    {
+        return gameCurrentDate.ToString("dd.MM.yyyy");
+    }
+    
+    // Получить месяц игровой даты
+    public int GetGameMonth()
+    {
+        return gameCurrentDate.Month;
+    }
+    
+    // Получить день игровой даты
+    public int GetGameDay()
+    {
+        return gameCurrentDate.Day;
+    }
+    
+    // Получить значения из инспектора
+    public int GetInspectorMonth()
+    {
+        return gameMonth;
+    }
+    
+    public int GetInspectorDay()
+    {
+        return gameDay;
+    }
+    
+    // Проверить, просрочен ли срок годности относительно игровой даты
+    public bool IsExpiryDateExpired(int expiryMonth, int expiryDay)
+    {
+        System.DateTime expiryDate = new System.DateTime(gameCurrentDate.Year, expiryMonth, expiryDay);
+        
+        // Если дата в прошлом году, добавляем год
+        if (expiryDate < gameCurrentDate)
+        {
+            expiryDate = expiryDate.AddYears(1);
+        }
+        
+        return expiryDate < gameCurrentDate;
+    }
+    
+    // Обновить календарь из игровой даты
+    public void UpdateCalendarFromGameDate()
+    {
+        if (calendar != null)
+        {
+            calendar.UpdateDateFromGameManager();
+        }
+        else
+        {
+            Debug.LogWarning("GameManager: Calendar не найден для обновления!");
+        }
+    }
+    
+
+    
+    // Получить ссылку на Calendar
+    public Calendar GetCalendar()
+    {
+        return calendar;
+    }
+    
+    // Установить ссылку на Calendar
+    public void SetCalendar(Calendar cal)
+    {
+        calendar = cal;
+    }
+    
     // Создать очередь на основе подсчитанных овощей
     private void CreateQueueFromVegetableCounts(Dictionary<CharacterType, int> vegetableCounts)
     {
@@ -226,8 +414,8 @@ public class GameManager : MonoBehaviour
         // Создаем список CharInfo для очереди
         List<CharInfo> queueCharacters = new List<CharInfo>();
         
-        // Получаем текущую дату
-        System.DateTime currentDate = System.DateTime.Now;
+        // Используем игровую дату
+        System.DateTime currentDate = gameCurrentDate;
         
         // Добавляем персонажей в соответствии с количеством овощей (первая половина - правильные)
         foreach (var kvp in vegetableCounts)
@@ -774,6 +962,86 @@ public class GameManager : MonoBehaviour
                 tastyButton.MakeActive();
             }
         }
+    }
+    
+    // Проверить заказ (вызывается из SendZone)
+    public void CheckOrder(Order order)
+    {
+        if (order == null)
+        {
+            Debug.LogWarning("GameManager: Попытка проверить null заказ!");
+            return;
+        }
+        
+        Debug.Log($"GameManager: Проверяем заказ '{order.name}'");
+        Debug.Log($"  - Количество добавленных персонажей: {order.GetAddedCharactersCount()}");
+        Debug.Log($"  - Количество наклеек: {order.GetActiveStickerCount()}");
+        
+        // Получаем список добавленных персонажей
+        List<CharInfo> addedCharacters = order.GetAddedCharacters();
+        if (addedCharacters.Count > 0)
+        {
+            Debug.Log("  - Добавленные персонажи:");
+            foreach (CharInfo charInfo in addedCharacters)
+            {
+                Debug.Log($"    * {charInfo.name} ({charInfo.GetVarietyDisplayName()} из {charInfo.GetOriginDisplayName()})");
+                
+                // Проверяем дефекты
+                if (charInfo.HasDefects())
+                {
+                    Debug.Log($"      Дефекты: {string.Join(", ", charInfo.defects)}");
+                }
+                else
+                {
+                    Debug.Log("      Дефектов нет");
+                }
+                
+                // Проверяем ошибки в данных (если у нас есть доступ к Character)
+                // Здесь мы можем проверить ошибки только на основе CharInfo
+                List<string> dataErrors = GetDataErrorsFromCharInfo(charInfo);
+                if (dataErrors.Count > 0)
+                {
+                    Debug.Log("      Ошибки в данных:");
+                    foreach (string error in dataErrors)
+                    {
+                        Debug.Log($"        - {error}");
+                    }
+                }
+                else
+                {
+                    Debug.Log("      Ошибок в данных нет");
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("  - Персонажи не добавлены");
+        }
+        
+        // Здесь можно добавить логику проверки заказа
+        // Например, сравнение с рецептами, подсчет очков и т.д.
+    }
+    
+    // Вспомогательный метод для проверки ошибок в данных CharInfo
+    private List<string> GetDataErrorsFromCharInfo(CharInfo charInfo)
+    {
+        List<string> errors = new List<string>();
+        
+        if (charInfo == null) return errors;
+        
+        // Проверяем срок годности относительно игровой даты
+        if (IsExpiryDateExpired(charInfo.expiryMonth, charInfo.expiryDay))
+        {
+            errors.Add($"Просроченный срок годности: {charInfo.GetExpiryDateString()} (игровая дата: {GetGameDateString()})");
+        }
+        
+        // Проверяем соответствие сорта и места происхождения
+        if (!charInfo.IsVarietyValidForOrigin())
+        {
+            errors.Add($"Несоответствие сорта '{charInfo.GetVarietyDisplayName()}' и места происхождения '{charInfo.GetOriginDisplayName()}'");
+        }
+        
+        return errors;
     }
     
     private void OnDestroy()

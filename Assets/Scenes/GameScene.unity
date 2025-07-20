@@ -2045,8 +2045,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selectedDay: 22
   selectedMonth: 10
-  dayText: {fileID: 0}
-  monthText: {fileID: 0}
+  dayText: {fileID: 1565767261}
+  monthText: {fileID: 223529440}
+  gameManager: {fileID: 1631151477}
+  useGameManagerDate: 1
 --- !u!114 &1146553800
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2405,7 +2407,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ea0b6a7cb502d8428cc3b7142739158, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  zoneName: "\u0423\u0442\u0438\u043B\u0438\u0437\u0430\u0442\u043E\u0440"
+  gameManager: {fileID: 1631151477}
+  zoneName: Orders Done
   destroySpeed: 2
   destroySound: {fileID: 0}
   highlightColor: {r: 1, g: 0, b: 0, a: 1}
@@ -2621,6 +2624,7 @@ MonoBehaviour:
   tastyButton: {fileID: 1789216298}
   paperSpawner: {fileID: 1013766542}
   recipeManager: {fileID: 1631151479}
+  calendar: {fileID: 1146553799}
   currentLevelRecipes:
   - {fileID: 11400000, guid: 3b30cff1df94fc84f8b44c9df340076b, type: 2}
   - {fileID: 11400000, guid: 8e72cfceebe07cc42beb48719fe62157, type: 2}
@@ -2634,6 +2638,9 @@ MonoBehaviour:
   currentPaper: {fileID: 0}
   initialQueue: []
   createQueueOnStart: 1
+  gameMonth: 3
+  gameDay: 16
+  useRealDate: 0
 --- !u!4 &1631151478
 Transform:
   m_ObjectHideFlags: 0

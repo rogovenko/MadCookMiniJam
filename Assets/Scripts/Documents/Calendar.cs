@@ -11,6 +11,13 @@ public class Calendar : MonoBehaviour
     [SerializeField] private TextMeshProUGUI dayText;
     [SerializeField] private TextMeshProUGUI monthText;
     
+    [Header("Game Manager")]
+    [Tooltip("Ссылка на GameManager (автоматически найден если не назначен)")]
+    [SerializeField] private GameManager gameManager;
+    
+    [Tooltip("Использовать дату из GameManager")]
+    [SerializeField] private bool useGameManagerDate = true;
+    
     // Перечисление месяцев
     public enum Month
     {
@@ -30,6 +37,18 @@ public class Calendar : MonoBehaviour
     
     private void Start()
     {
+        // Если GameManager не назначен, пытаемся найти его
+        if (gameManager == null)
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
+        
+        // Если используем дату из GameManager и он найден
+        if (useGameManagerDate && gameManager != null)
+        {
+            UpdateDateFromGameManager();
+        }
+        
         UpdateCalendarDisplay();
     }
     
@@ -107,6 +126,49 @@ public class Calendar : MonoBehaviour
     public string GetFullDate()
     {
         return $"{selectedDay} {GetMonthName(selectedMonth)}";
+    }
+    
+    // Обновить дату из GameManager
+    public void UpdateDateFromGameManager()
+    {
+        if (gameManager != null)
+        {
+            int gameMonth = gameManager.GetGameMonth();
+            int gameDay = gameManager.GetGameDay();
+            
+            SetDay(gameDay);
+            SetMonth((Month)(gameMonth - 1)); // Конвертируем в enum (0-based)
+            
+            Debug.Log($"Calendar: Дата обновлена из GameManager - {gameDay} {GetMonthName((Month)(gameMonth - 1))}");
+        }
+        else
+        {
+            Debug.LogWarning("Calendar: GameManager не найден для обновления даты!");
+        }
+    }
+    
+
+    
+    // Получить ссылку на GameManager
+    public GameManager GetGameManager()
+    {
+        return gameManager;
+    }
+    
+    // Установить ссылку на GameManager
+    public void SetGameManager(GameManager manager)
+    {
+        gameManager = manager;
+    }
+    
+    // Переключить использование даты из GameManager
+    public void SetUseGameManagerDate(bool use)
+    {
+        useGameManagerDate = use;
+        if (use && gameManager != null)
+        {
+            UpdateDateFromGameManager();
+        }
     }
     
     // Увеличить день на 1

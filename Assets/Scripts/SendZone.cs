@@ -4,6 +4,10 @@ using UnityEngine.EventSystems;
 [RequireComponent(typeof(UnityEngine.UI.Image))]
 public class SendZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
+    [Header("Ссылки")]
+    [Tooltip("Ссылка на GameManager")]
+    [SerializeField] private GameManager gameManager;
+    
     [Header("Настройки зоны утилизации")]
     [Tooltip("Название зоны утилизации")]
     [SerializeField] private string zoneName = "Утилизатор";
@@ -35,6 +39,12 @@ public class SendZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if (zoneImage != null)
         {
             originalColor = zoneImage.color;
+        }
+        
+        // Если GameManager не назначен, пытаемся найти его
+        if (gameManager == null)
+        {
+            gameManager = FindObjectOfType<GameManager>();
         }
         
         // Регистрируемся в системе событий
@@ -162,6 +172,7 @@ public class SendZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
                 // Если это Order - размещаем его в SendZone
                 Debug.Log("SendZone: Размещаем Order в SendZone");
                 CompleteOrder(order);
+                gameManager.CheckOrder(order);
             }
             else
             {

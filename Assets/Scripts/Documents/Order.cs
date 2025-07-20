@@ -44,6 +44,10 @@ public class Order : Paper
     [Tooltip("Текстура наклейки моркови")]
     [SerializeField] private Sprite carrotSticker;
     
+    [Header("Добавленные персонажи")]
+    [Tooltip("Список CharInfo добавленных в заказ персонажей")]
+    [SerializeField] private List<CharInfo> addedChars = new List<CharInfo>();
+    
     private Dictionary<CharacterType, Sprite> stickerSprites = new Dictionary<CharacterType, Sprite>();
     
     protected override void Start()
@@ -171,6 +175,9 @@ public class Order : Paper
                 slot.stickerImage.gameObject.SetActive(false);
             }
         }
+        
+        // Очищаем список добавленных персонажей
+        ClearAddedCharacters();
     }
     
     // Получить количество активных наклеек
@@ -219,6 +226,35 @@ public class Order : Paper
         return maxStickers - GetActiveStickerCount();
     }
     
+    // Добавить персонажа в список добавленных
+    public void AddCharacter(CharInfo charInfo)
+    {
+        if (charInfo != null)
+        {
+            addedChars.Add(charInfo);
+            Debug.Log($"Order: Добавлен персонаж {charInfo.name} ({charInfo.GetVarietyDisplayName()} из {charInfo.GetOriginDisplayName()}) в заказ");
+        }
+    }
+    
+    // Получить список добавленных персонажей
+    public List<CharInfo> GetAddedCharacters()
+    {
+        return new List<CharInfo>(addedChars);
+    }
+    
+    // Очистить список добавленных персонажей
+    public void ClearAddedCharacters()
+    {
+        addedChars.Clear();
+        Debug.Log("Order: Список добавленных персонажей очищен");
+    }
+    
+    // Получить количество добавленных персонажей
+    public int GetAddedCharactersCount()
+    {
+        return addedChars.Count;
+    }
+    
     // Установить текст заказа
     public void SetOrderText(string orderText)
     {   
@@ -255,14 +291,20 @@ public class Order : Paper
             GameObject currentCharacter = gameManager.GetCurrentCharacter();
             if (currentCharacter != null)
             {
-                // Получаем тип персонажа
+                // Получаем компонент персонажа
                 Character characterComponent = currentCharacter.GetComponent<Character>();
                 if (characterComponent != null)
                 {
                     CharacterType characterType = characterComponent.GetCharacterType();
                     
+                    // Получаем CharInfo персонажа
+                    CharInfo charInfo = characterComponent.GetCharacterInfo();
+                    
                     // Добавляем наклейку в заказ
                     AddSticker(characterType);
+                    
+                    // Добавляем персонажа в список добавленных
+                    AddCharacter(charInfo);
                     
                     // Уничтожаем текущего персонажа
                     gameManager.DestroyCurrentCharacter();

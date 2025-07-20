@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class Character : MonoBehaviour
 {
@@ -316,5 +317,140 @@ public class Character : MonoBehaviour
     public bool IsVarietyValidForOrigin()
     {
         return characterInfo?.IsVarietyValidForOrigin() ?? false;
+    }
+    
+    // Определить ошибки в данных персонажа
+    public List<string> GetCharacterErrors()
+    {
+        List<string> errors = new List<string>();
+        
+        if (characterInfo == null)
+        {
+            errors.Add("Отсутствует информация о персонаже");
+            return errors;
+        }
+        
+        // Проверяем правильность имени
+        string expectedName = GetExpectedNameForType(characterType);
+        if (characterInfo.name != expectedName)
+        {
+            errors.Add($"Неправильное имя: '{characterInfo.name}' вместо '{expectedName}'");
+        }
+        
+        // Проверяем правильность сорта для типа персонажа
+        VegetableVariety expectedVariety = GetExpectedVarietyForType(characterType);
+        if (characterInfo.variety != expectedVariety)
+        {
+            errors.Add($"Неправильный сорт: '{characterInfo.GetVarietyDisplayName()}' вместо '{GetVarietyDisplayName(expectedVariety)}'");
+        }
+        
+        // Проверяем правильность места происхождения для сорта
+        OriginLocation expectedOrigin = GetExpectedOriginForVariety(characterInfo.variety);
+        if (characterInfo.origin != expectedOrigin)
+        {
+            errors.Add($"Неправильное место происхождения: '{characterInfo.GetOriginDisplayName()}' вместо '{GetOriginDisplayName(expectedOrigin)}'");
+        }
+        
+        // Проверяем срок годности (не должен быть просрочен)
+        if (IsExpiryDateExpired(characterInfo))
+        {
+            errors.Add($"Просроченный срок годности: {characterInfo.GetExpiryDateString()}");
+        }
+        
+        return errors;
+    }
+    
+    // Получить ожидаемое имя для типа персонажа
+    private string GetExpectedNameForType(CharacterType type)
+    {
+        switch (type)
+        {
+            case CharacterType.Tomato: return "Tomato";
+            case CharacterType.Onion: return "Onion";
+            case CharacterType.Potato: return "Potato";
+            case CharacterType.Cucumber: return "Cucumber";
+            case CharacterType.Carrot: return "Carrot";
+            case CharacterType.Eggplant: return "Eggplant";
+            default: return "Unknown";
+        }
+    }
+    
+    // Получить ожидаемый сорт для типа персонажа
+    private VegetableVariety GetExpectedVarietyForType(CharacterType type)
+    {
+        switch (type)
+        {
+            case CharacterType.Tomato: return VegetableVariety.SunnyCherry;
+            case CharacterType.Onion: return VegetableVariety.SnowShallot;
+            case CharacterType.Potato: return VegetableVariety.Bellarose;
+            case CharacterType.Cucumber: return VegetableVariety.PicklerGuest;
+            case CharacterType.Carrot: return VegetableVariety.NantesShine;
+            case CharacterType.Eggplant: return VegetableVariety.PrinceLilac;
+            default: return VegetableVariety.SunnyCherry;
+        }
+    }
+    
+    // Получить ожидаемое место происхождения для сорта
+    private OriginLocation GetExpectedOriginForVariety(VegetableVariety variety)
+    {
+        switch (variety)
+        {
+            case VegetableVariety.SunnyCherry: return OriginLocation.SunnyvaleFarm;
+            case VegetableVariety.BeefsteakRed: return OriginLocation.MapleGroveOrchards;
+            case VegetableVariety.GoldenVine: return OriginLocation.RedwoodGreenhouses;
+            case VegetableVariety.SnowShallot: return OriginLocation.BlueRiverRanch;
+            case VegetableVariety.HoneyBulb: return OriginLocation.GoldenFieldsEstate;
+            case VegetableVariety.PhoenixCrimson: return OriginLocation.SilverstoneHollow;
+            case VegetableVariety.Bellarose: return OriginLocation.HarvestHillHomestead;
+            case VegetableVariety.LadyCream: return OriginLocation.EmeraldValleyFarms;
+            case VegetableVariety.Rosara: return OriginLocation.WindmillCreekPlantation;
+            case VegetableVariety.PicklerGuest: return OriginLocation.HarvestMoonGardens;
+            case VegetableVariety.PicadorFresh: return OriginLocation.SunnyvaleFarm;
+            case VegetableVariety.HermanRough: return OriginLocation.MapleGroveOrchards;
+            case VegetableVariety.NantesShine: return OriginLocation.RedwoodGreenhouses;
+            case VegetableVariety.ChantenOrange: return OriginLocation.BlueRiverRanch;
+            case VegetableVariety.RubyTriangle: return OriginLocation.GoldenFieldsEstate;
+            case VegetableVariety.PrinceLilac: return OriginLocation.SilverstoneHollow;
+            case VegetableVariety.AuroraDark: return OriginLocation.HarvestHillHomestead;
+            case VegetableVariety.GladiatorViolet: return OriginLocation.EmeraldValleyFarms;
+            default: return OriginLocation.SunnyvaleFarm;
+        }
+    }
+    
+    // Получить отображаемое имя сорта
+    private string GetVarietyDisplayName(VegetableVariety variety)
+    {
+        return variety.ToString().Replace("_", " ");
+    }
+    
+    // Получить отображаемое имя места происхождения
+    private string GetOriginDisplayName(OriginLocation origin)
+    {
+        return origin.ToString().Replace("_", " ");
+    }
+    
+    // Проверить, просрочен ли срок годности
+    private bool IsExpiryDateExpired(CharInfo charInfo)
+    {
+        if (charInfo == null) return false;
+        
+        // Получаем игровую дату из GameManager
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        if (gameManager != null)
+        {
+            return gameManager.IsExpiryDateExpired(charInfo.expiryMonth, charInfo.expiryDay);
+        }
+        
+        // Fallback на реальную дату если GameManager не найден
+        System.DateTime currentDate = System.DateTime.Now;
+        System.DateTime expiryDate = new System.DateTime(currentDate.Year, charInfo.expiryMonth, charInfo.expiryDay);
+        
+        // Если дата в прошлом году, добавляем год
+        if (expiryDate < currentDate)
+        {
+            expiryDate = expiryDate.AddYears(1);
+        }
+        
+        return expiryDate < currentDate;
     }
 } 
