@@ -18,6 +18,9 @@ public class Character : MonoBehaviour
     
     [Tooltip("Была ли уже запрошена бумажка у этого персонажа")]
     [SerializeField] private bool hasBeenAskedForPapers = false;
+    
+    [Tooltip("Информация о персонаже (сорт, место происхождения, дефекты и т.д.)")]
+    [SerializeField] private CharInfo characterInfo;
 
     [Header("Компоненты")]
     [Tooltip("Image компонент для отображения тела персонажа")]
@@ -147,7 +150,6 @@ public class Character : MonoBehaviour
         {
             // Скрываем компонент дефекта
             defectImage.gameObject.SetActive(false);
-            Debug.Log($"Character: Дефект убран с {gameObject.name}");
         }
         else
         {
@@ -206,14 +208,12 @@ public class Character : MonoBehaviour
     public void MarkAsAskedForPapers()
     {
         hasBeenAskedForPapers = true;
-        Debug.Log($"Character: Персонаж {gameObject.name} отмечен как уже запрошенный для бумажек");
     }
     
     // Сбросить флаг запроса бумажек (для повторного использования персонажа)
     public void ResetPapersRequest()
     {
         hasBeenAskedForPapers = false;
-        Debug.Log($"Character: Сброшен флаг запроса бумажек для персонажа {gameObject.name}");
     }
     
     // "Раздеть" персонажа - убрать одежду
@@ -246,5 +246,75 @@ public class Character : MonoBehaviour
     public void SetCustomName(string name)
     {
         customCharacterName = name;
+    }
+    
+    // Установить информацию о персонаже
+    public void SetCharacterInfo(CharInfo info)
+    {
+        characterInfo = info;
+
+        Debug.Log($"Character: есть ли дефекты? {characterInfo.HasDefects()}");
+        
+        // Автоматически применяем дефекты из CharInfo
+        if (characterInfo != null && characterInfo.HasDefects())
+        {
+            Debug.Log($"Character: есть дефекты {characterInfo.defects[0]}");
+            // Берем первый дефект (можно расширить для множественных дефектов)
+            foreach (CharacterDefect defect in characterInfo.defects)
+            {
+                if (defect != CharacterDefect.None)
+                {
+                    ApplyDefect(defect, characterShape);
+                    Debug.Log($"Character: Применен дефект {defect} из CharInfo к {gameObject.name}");
+                    break; // Применяем только первый дефект для простоты
+                }else{
+                    Debug.Log($"Character: дефект None");
+                    ApplyDefect(CharacterDefect.None, characterShape);
+                }
+            }
+        }
+        else if (characterInfo != null)
+        {
+            // Если дефектов нет, убираем все дефекты
+            ApplyDefect(CharacterDefect.None, characterShape);
+        }
+        
+        Debug.Log($"Character: Установлена информация о персонаже {characterInfo?.name} ({characterInfo?.GetVarietyDisplayName()} из {characterInfo?.GetOriginDisplayName()})");
+    }
+    
+    // Получить информацию о персонаже
+    public CharInfo GetCharacterInfo()
+    {
+        return characterInfo;
+    }
+    
+    // Получить сорт овоща
+    public VegetableVariety GetVariety()
+    {
+        return characterInfo?.variety ?? VegetableVariety.SunnyCherry;
+    }
+    
+    // Получить место происхождения
+    public OriginLocation GetOrigin()
+    {
+        return characterInfo?.origin ?? OriginLocation.SunnyvaleFarm;
+    }
+    
+    // Получить срок годности в виде строки
+    public string GetExpiryDate()
+    {
+        return characterInfo?.GetExpiryDateString() ?? "01/01";
+    }
+    
+    // Проверить, есть ли дефекты у персонажа
+    public bool HasCharacterDefects()
+    {
+        return characterInfo?.HasDefects() ?? false;
+    }
+    
+    // Проверить, соответствует ли сорт месту происхождения
+    public bool IsVarietyValidForOrigin()
+    {
+        return characterInfo?.IsVarietyValidForOrigin() ?? false;
     }
 } 

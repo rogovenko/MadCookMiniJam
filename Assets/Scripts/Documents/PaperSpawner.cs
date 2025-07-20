@@ -50,8 +50,6 @@ public class PaperSpawner : MonoBehaviour
             paperObj.transform.localPosition = finalPosition;
         }
         
-        Debug.Log($"PaperSpawner: Создана бумажка {paperObj.name} в позиции {finalPosition}");
-        
         return paperObj;
     }
 } 

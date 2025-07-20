@@ -181,13 +181,11 @@ public class DragEventSystem : MonoBehaviour
     public void EnableDragDrop()
     {
         isDragDropEnabled = true;
-        Debug.Log("DragEventSystem: Drag'n'drop включен глобально");
     }
     
     public void DisableDragDrop()
     {
         isDragDropEnabled = false;
-        Debug.Log("DragEventSystem: Drag'n'drop отключен глобально");
         
         // Если что-то перетаскивается, останавливаем
         if (currentDraggedObject != null)
@@ -199,7 +197,6 @@ public class DragEventSystem : MonoBehaviour
     public void SetDragDropEnabled(bool enabled)
     {
         isDragDropEnabled = enabled;
-        Debug.Log($"DragEventSystem: Drag'n'drop {(enabled ? "включен" : "отключен")} глобально");
         
         if (!enabled && currentDraggedObject != null)
         {

@@ -139,8 +139,6 @@ public class Order : Paper
                 emptySlot.stickerImage.gameObject.SetActive(true);
                 emptySlot.stickerImage.sprite = stickerSprites[vegetableType];
             }
-            
-            Debug.Log($"Order: Добавлена наклейка {vegetableType} в слот {stickerSlots.IndexOf(emptySlot)}");
         }
         else
         {
@@ -173,7 +171,6 @@ public class Order : Paper
                 slot.stickerImage.gameObject.SetActive(false);
             }
         }
-        Debug.Log("Order: Все наклейки очищены");
     }
     
     // Получить количество активных наклеек
@@ -224,18 +221,14 @@ public class Order : Paper
     
     // Установить текст заказа
     public void SetOrderText(string orderText)
-    {
-        // Ищем TextMeshPro компонент для отображения текста заказа
-        TextMeshProUGUI orderTextComponent = GetComponentInChildren<TextMeshProUGUI>();
-        
-        if (orderTextComponent != null)
+    {   
+        if (paperText != null)
         {
-            orderTextComponent.text = orderText;
-            Debug.Log($"Order: Установлен текст заказа: {orderText}");
+            paperText.text = orderText;
         }
         else
         {
-            Debug.LogWarning("Order: Не найден TextMeshProUGUI компонент для отображения текста заказа!");
+            Debug.LogWarning("Order: Не найден paperText компонент для отображения текста заказа!");
         }
     }
     
@@ -270,8 +263,6 @@ public class Order : Paper
                     
                     // Добавляем наклейку в заказ
                     AddSticker(characterType);
-                    
-                    Debug.Log($"Order: Добавлен персонаж {characterType} в заказ");
                     
                     // Уничтожаем текущего персонажа
                     gameManager.DestroyCurrentCharacter();
@@ -312,7 +303,5 @@ public class Order : Paper
         
         // Добавляем наш метод в события клика
         button.onClick.AddListener(OnOrderClick);
-        
-        Debug.Log("Order: Button компонент настроен автоматически");
     }
 } 

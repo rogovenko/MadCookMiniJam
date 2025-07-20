@@ -2632,7 +2632,7 @@ MonoBehaviour:
   chooseOrderMode: 0
   currentCharacter: {fileID: 0}
   currentPaper: {fileID: 0}
-  initialQueue: 0000000001000000020000000300000004000000050000000000000002000000
+  initialQueue: []
   createQueueOnStart: 1
 --- !u!4 &1631151478
 Transform:

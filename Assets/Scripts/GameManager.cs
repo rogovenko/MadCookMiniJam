@@ -59,7 +59,7 @@ public class GameManager : MonoBehaviour
     
     [Header("Настройки очереди")]
     [Tooltip("Начальная очередь персонажей")]
-    [SerializeField] private List<CharacterType> initialQueue = new List<CharacterType>();
+    [SerializeField] private List<CharInfo> initialQueue = new List<CharInfo>();
     
     [Tooltip("Создать очередь при старте игры")]
     [SerializeField] private bool createQueueOnStart = true;
@@ -158,8 +158,169 @@ public class GameManager : MonoBehaviour
         // Создаем очередь при старте
         if (createQueueOnStart)
         {
+            DefineQueue();
             CreateQueue();
             InitRecipes();
+        }
+    }
+
+    public void DefineQueue()
+    {
+        if (currentLevelRecipes == null || currentLevelRecipes.Count == 0)
+        {
+            Debug.LogWarning("GameManager: Список currentLevelRecipes пуст! Нечего подсчитывать.");
+            return;
+        }
+        
+        // Словарь для подсчета овощей
+        Dictionary<CharacterType, int> vegetableCounts = new Dictionary<CharacterType, int>();
+        
+        // Инициализируем все типы овощей с нулевым количеством
+        foreach (CharacterType vegType in (CharacterType[])System.Enum.GetValues(typeof(CharacterType)))
+        {
+            vegetableCounts[vegType] = 0;
+        }
+        
+        // Подсчитываем овощи в рецептах
+        foreach (RecipeData recipe in currentLevelRecipes)
+        {
+            if (recipe != null && recipe.ingredients != null)
+            {
+                foreach (RecipeIngredient ingredient in recipe.ingredients)
+                {
+                    CharacterType vegType = ingredient.ingredientType;
+                    int amount = ingredient.amount;
+                    
+                    if (vegetableCounts.ContainsKey(vegType))
+                    {
+                        vegetableCounts[vegType] += amount;
+                    }
+                }
+            }
+        }
+        
+        // Выводим результат в консоль
+        Debug.Log("GameManager: Подсчет овощей в рецептах:");
+        foreach (var kvp in vegetableCounts)
+        {
+            if (kvp.Value > 0) // Показываем только те, которые встречаются
+            {
+                Debug.Log($"  {kvp.Key}: {kvp.Value} шт.");
+            }
+        }
+        
+        // Здесь можно использовать vegetableCounts для создания очереди
+        // Например, создать персонажей в соответствии с количеством овощей
+        CreateQueueFromVegetableCounts(vegetableCounts);
+    }
+    
+    // Создать очередь на основе подсчитанных овощей
+    private void CreateQueueFromVegetableCounts(Dictionary<CharacterType, int> vegetableCounts)
+    {
+        if (queueManager == null)
+        {
+            Debug.LogError("GameManager: QueueManager не назначен! Нельзя создать очередь.");
+            return;
+        }
+        
+        // Создаем список CharInfo для очереди
+        List<CharInfo> queueCharacters = new List<CharInfo>();
+        
+        // Получаем текущую дату
+        System.DateTime currentDate = System.DateTime.Now;
+        
+        // Добавляем персонажей в соответствии с количеством овощей (первая половина - правильные)
+        foreach (var kvp in vegetableCounts)
+        {
+            CharacterType vegType = kvp.Key;
+            int count = kvp.Value;
+            
+            // Добавляем персонажа столько раз, сколько нужно овощей этого типа
+            for (int i = 0; i < count; i++)
+            {
+                // Создаем правильный персонаж без ошибок и дефектов
+                CharInfo correctCharacter = new CharInfo(vegType, false, false, currentDate);
+                queueCharacters.Add(correctCharacter);
+            }
+        }
+        
+        // Перемешиваем первую половину (овощи из рецептов)
+        ShuffleList(queueCharacters);
+        
+        // Подсчитываем общее количество овощей из рецептов
+        int requiredVegetablesCount = queueCharacters.Count;
+        
+        // Вычисляем количество ошибок для случайных овощей
+        int errorNum = Mathf.RoundToInt(requiredVegetablesCount / 2f);
+        
+        // Создаем списки индексов для распределения ошибок
+        List<int> defectIndices = new List<int>();
+        List<int> mistakeIndices = new List<int>();
+        
+        // Генерируем случайные индексы для дефектов
+        for (int i = 0; i < errorNum; i++)
+        {
+            int randomIndex;
+            do
+            {
+                randomIndex = Random.Range(0, requiredVegetablesCount);
+            } while (defectIndices.Contains(randomIndex));
+            defectIndices.Add(randomIndex);
+        }
+        
+        // Генерируем случайные индексы для ошибок
+        for (int i = 0; i < errorNum; i++)
+        {
+            int randomIndex;
+            do
+            {
+                randomIndex = Random.Range(0, requiredVegetablesCount);
+            } while (mistakeIndices.Contains(randomIndex));
+            mistakeIndices.Add(randomIndex);
+        }
+        
+        // Добавляем случайные овощи (вторая половина)
+        List<CharacterType> allVegetableTypes = new List<CharacterType>((CharacterType[])System.Enum.GetValues(typeof(CharacterType)));
+        
+        for (int i = 0; i < requiredVegetablesCount; i++)
+        {
+            // Выбираем случайный тип овоща
+            CharacterType randomVegType = allVegetableTypes[Random.Range(0, allVegetableTypes.Count)];
+            
+            // Определяем, нужны ли ошибки для этого персонажа
+            bool hasDefect = defectIndices.Contains(i);
+            bool hasMistake = mistakeIndices.Contains(i);
+            
+            // Создаем случайный персонаж с возможными ошибками
+            CharInfo randomCharacter = new CharInfo(randomVegType, hasMistake, hasDefect, currentDate);
+            queueCharacters.Add(randomCharacter);
+        }
+        
+        // Перемешиваем всю очередь
+        ShuffleList(queueCharacters);
+        
+        // Сохраняем очередь для использования в CreateQueue()
+        initialQueue = queueCharacters;
+        
+        Debug.Log($"GameManager: Создана очередь из {queueCharacters.Count} персонажей:");
+        Debug.Log($"  - {requiredVegetablesCount} правильных овощей из рецептов");
+        Debug.Log($"  - {requiredVegetablesCount} случайных овощей");
+        Debug.Log($"  - {errorNum} случайных овощей с дефектами");
+        Debug.Log($"  - {errorNum} случайных овощей с ошибками в документах");
+    }
+    
+    // Перемешивание списка (алгоритм Fisher-Yates)
+    private void ShuffleList<T>(List<T> list)
+    {
+        System.Random rng = new System.Random();
+        int n = list.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = rng.Next(n + 1);
+            T value = list[k];
+            list[k] = list[n];
+            list[n] = value;
         }
     }
     
@@ -169,7 +330,6 @@ public class GameManager : MonoBehaviour
         if (queueManager != null)
         {
             queueManager.CreateQueue(initialQueue);
-            Debug.Log($"GameManager: Создана очередь с {initialQueue.Count} персонажами");
         }
         else
         {
@@ -204,18 +364,15 @@ public class GameManager : MonoBehaviour
             Debug.LogError("GameManager: orderSpawnPosition не назначен! Нельзя создать заказы.");
             return;
         }
-        
+
         foreach (RecipeData recipe in currentLevelRecipes)
         {
             if (recipe != null && !string.IsNullOrEmpty(recipe.recipeName))
             {
                 // Создаем заказ с названием рецепта
                 CreateOrder(recipe.recipeName);
-                Debug.Log($"GameManager: Создан заказ для рецепта '{recipe.recipeName}'");
             }
         }
-        
-        Debug.Log($"GameManager: Инициализировано {currentLevelRecipes.Count} рецептов");
     }
     
     // Вспомогательный метод для создания заказа
@@ -256,14 +413,23 @@ public class GameManager : MonoBehaviour
         Order orderComponent = orderObject.GetComponent<Order>();
         if (orderComponent != null)
         {
-            orderComponent.SetOrderText(recipeName);
+            // Используем корутину чтобы дождаться Start()
+            StartCoroutine(SetOrderTextAfterStart(orderComponent, recipeName));
         }
         else
         {
             Debug.LogWarning($"GameManager: На созданном заказе отсутствует компонент Order!");
         }
+    }
+    
+    // Корутина для установки текста заказа после Start()
+    private System.Collections.IEnumerator SetOrderTextAfterStart(Order orderComponent, string recipeName)
+    {
+        // Ждем один кадр чтобы Start() успел выполниться
+        yield return null;
         
-        Debug.Log($"GameManager: Создан заказ '{recipeName}' в Canvas");
+        // Теперь устанавливаем текст
+        orderComponent.SetOrderText(recipeName);
     }
     
     // Получить количество текущих заказов (для вычисления оффсета)
@@ -301,17 +467,19 @@ public class GameManager : MonoBehaviour
             if (queueManager.GetQueueCount() > 0)
             {
                 // Получаем первого персонажа из очереди и удаляем его из очереди
-                CharacterType characterType = queueManager.RemoveFirstFromQueue();
-                GameObject character = charManager.CreateCharacter(characterType);
+                CharInfo charInfo = queueManager.RemoveFirstFromQueue();
+                GameObject character = charManager.CreateCharacter(charInfo.characterType);
                 if (character != null)
                 {
+                    // Применяем информацию о персонаже (дефекты, сорт, место происхождения и т.д.)
+                    ApplyCharacterInfo(character, charInfo);
+                    
                     SetCurrentCharacter(character);
                     
                     // Запускаем таймер после создания первого персонажа
                     if (gameTimer != null)
                     {
                         gameTimer.StartTimer();
-                        Debug.Log("GameManager: Таймер запущен!");
                     }
                 }
             }
@@ -323,6 +491,22 @@ public class GameManager : MonoBehaviour
         else
         {
             Debug.LogError("GameManager: CharManager или QueueManager не назначены!");
+        }
+    }
+    
+    // Применить информацию о персонаже к созданному объекту
+    private void ApplyCharacterInfo(GameObject character, CharInfo charInfo)
+    {
+        Debug.Log($"GameManager: Применена информация к персонажу {charInfo.name} ({charInfo.GetVarietyDisplayName()} из {charInfo.GetOriginDisplayName()})");
+        // Передаем CharInfo в компонент Character
+        Character characterComponent = character.GetComponent<Character>();
+        if (characterComponent != null)
+        {
+            characterComponent.SetCharacterInfo(charInfo);
+        }
+        else
+        {
+            Debug.LogWarning("GameManager: На персонаже отсутствует компонент Character!");
         }
     }
     
@@ -362,8 +546,6 @@ public class GameManager : MonoBehaviour
     {
         // Переключаем режим выбора заказа
         chooseOrderMode = !chooseOrderMode;
-        
-        Debug.Log($"GameManager: Режим выбора заказа изменен на {(chooseOrderMode ? "активный" : "неактивный")}");
         
         // Управляем drag'n'drop через DragEventSystem
         if (dragEventSystem != null)
@@ -425,7 +607,6 @@ public class GameManager : MonoBehaviour
                 {
                     // Создаем бумажку и сохраняем ссылку на неё
                     currentPaper = paperSpawner.SpawnPaper();
-                    Debug.Log("GameManager: Запущен спавн бумаг!");
                 }
                 else
                 {
@@ -450,7 +631,6 @@ public class GameManager : MonoBehaviour
         {
             Destroy(currentPaper);
             currentPaper = null;
-            Debug.Log("GameManager: Текущая бумажка уничтожена!");
         }
     }
     
@@ -568,7 +748,6 @@ public class GameManager : MonoBehaviour
     public void SetChooseOrderMode(bool mode)
     {
         chooseOrderMode = mode;
-        Debug.Log($"GameManager: Режим выбора заказа установлен на {(chooseOrderMode ? "активный" : "неактивный")}");
         
         // Управляем drag'n'drop в зависимости от режима
         if (dragEventSystem != null)

@@ -27,8 +27,6 @@ public class RecipeManager : MonoBehaviour
                 recipesByName[recipe.recipeName] = recipe;
             }
         }
-        
-        Debug.Log($"RecipeManager: Инициализировано {recipesByName.Count} рецептов");
     }
     
     // Получить рецепт по названию
@@ -89,8 +87,6 @@ public class RecipeManager : MonoBehaviour
             {
                 recipesByName[recipe.recipeName] = recipe;
             }
-            
-            Debug.Log($"RecipeManager: Добавлен рецепт '{recipe.recipeName}'");
         }
     }
     
@@ -106,7 +102,6 @@ public class RecipeManager : MonoBehaviour
                 recipesByName.Remove(recipe.recipeName);
             }
             
-            Debug.Log($"RecipeManager: Удален рецепт '{recipe.recipeName}'");
         }
     }
     

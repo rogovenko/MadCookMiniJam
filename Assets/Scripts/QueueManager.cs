@@ -41,23 +41,31 @@ public class QueueManager : MonoBehaviour
         characterSprites[CharacterType.Carrot] = carrotSprite;
     }
     
-    public void CreateQueue(List<CharacterType> characterTypes)
+    public void CreateQueue(List<CharInfo> characterInfos)
     {
         InitializeCharacterSprites();
         ClearQueue();
         
         Vector2 currentPosition = (Vector2)transform.position;
         
-        foreach (CharacterType characterType in characterTypes)
+        foreach (CharInfo charInfo in characterInfos)
         {
             GameObject queueObject = Instantiate(charShadowPrefab, currentPosition, Quaternion.identity, transform);
             
             // Найти и установить спрайт
             Image image = queueObject.GetComponent<Image>();
-            if (image != null && characterSprites.ContainsKey(characterType))
+            if (image != null && characterSprites.ContainsKey(charInfo.characterType))
             {
-                image.sprite = characterSprites[characterType];
+                image.sprite = characterSprites[charInfo.characterType];
             }
+            
+            // Сохраняем CharInfo в объекте очереди для дальнейшего использования
+            QueueObjectData queueData = queueObject.GetComponent<QueueObjectData>();
+            if (queueData == null)
+            {
+                queueData = queueObject.AddComponent<QueueObjectData>();
+            }
+            queueData.charInfo = charInfo;
             
             queueObjects.Add(queueObject);
             currentPosition.x += horizontalOffset;
@@ -79,12 +87,12 @@ public class QueueManager : MonoBehaviour
         queueObjects.Clear();
     }
     
-    public CharacterType RemoveFirstFromQueue()
+    public CharInfo RemoveFirstFromQueue()
     {
         if (queueObjects.Count > 0)
         {
             GameObject firstObject = queueObjects[0];
-            CharacterType characterType = GetCharacterTypeFromQueueObject(firstObject);
+            CharInfo charInfo = GetCharInfoFromQueueObject(firstObject);
             queueObjects.RemoveAt(0);
             
             if (firstObject != null)
@@ -95,9 +103,9 @@ public class QueueManager : MonoBehaviour
             // Сдвинуть оставшиеся объекты влево
             RepositionQueue();
             
-            return characterType;
+            return charInfo;
         }
-        return CharacterType.Tomato; // Возвращаем Tomato как fallback
+        return new CharInfo(CharacterType.Tomato, false, false, System.DateTime.Now); // Возвращаем Tomato как fallback
     }
     
     private void RepositionQueue()
@@ -114,21 +122,28 @@ public class QueueManager : MonoBehaviour
         }
     }
     
-    // Получить тип первого персонажа в очереди
-    public CharacterType GetFirstCharacterType()
+    // Получить информацию о первом персонаже в очереди
+    public CharInfo GetFirstCharacterInfo()
     {
         if (queueObjects.Count > 0 && queueObjects[0] != null)
         {
-            // Получаем тип персонажа из первого объекта в очереди
-            return GetCharacterTypeFromQueueObject(queueObjects[0]);
+            // Получаем информацию о персонаже из первого объекта в очереди
+            return GetCharInfoFromQueueObject(queueObjects[0]);
         }
-        return CharacterType.Tomato; // Возвращаем Tomato как fallback
+        return new CharInfo(CharacterType.Tomato, false, false, System.DateTime.Now); // Возвращаем Tomato как fallback
     }
     
-    // Получить тип персонажа из объекта очереди
-    private CharacterType GetCharacterTypeFromQueueObject(GameObject queueObject)
+    // Получить информацию о персонаже из объекта очереди
+    private CharInfo GetCharInfoFromQueueObject(GameObject queueObject)
     {
-        // Проверяем спрайт объекта и определяем тип персонажа
+        // Получаем CharInfo из компонента QueueObjectData
+        QueueObjectData queueData = queueObject.GetComponent<QueueObjectData>();
+        if (queueData != null && queueData.charInfo != null)
+        {
+            return queueData.charInfo;
+        }
+        
+        // Fallback: определяем тип по спрайту
         Image image = queueObject.GetComponent<Image>();
         if (image != null && image.sprite != null)
         {
@@ -136,11 +151,11 @@ public class QueueManager : MonoBehaviour
             {
                 if (kvp.Value == image.sprite)
                 {
-                    return kvp.Key;
+                    return new CharInfo(kvp.Key, false, false, System.DateTime.Now);
                 }
             }
         }
-        return CharacterType.Tomato; // Возвращаем Tomato как fallback
+        return new CharInfo(CharacterType.Tomato, false, false, System.DateTime.Now); // Возвращаем Tomato как fallback
     }
     
     // Получить количество персонажей в очереди

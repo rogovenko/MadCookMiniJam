@@ -220,9 +220,8 @@ public class CharManager : MonoBehaviour
                     characterComponent.SetClothesSprite(randomClothes);
                 }
                 
-                // Случайно выбираем дефект для данной формы
-                CharacterDefect randomDefect = GetRandomDefectForShape(spriteData.characterShape);
-                characterComponent.ApplyDefect(randomDefect, spriteData.characterShape);
+                // Дефекты будут применены позже через CharInfo
+                // Не применяем случайные дефекты здесь
             }
             else
             {
