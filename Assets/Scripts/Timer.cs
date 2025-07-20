@@ -8,6 +8,10 @@ public class Timer : MonoBehaviour
     [SerializeField] private float initialTimeInSeconds = 300f;
     [SerializeField] private TextMeshProUGUI timerText;
     
+    [Header("Game Manager")]
+    [Tooltip("Ссылка на GameManager для вызова окончания игры")]
+    [SerializeField] private GameManager gameManager;
+    
     [Header("Timer State")]
     [SerializeField] private float currentTime;
     [SerializeField] private bool isRunning = false;
@@ -21,6 +25,12 @@ public class Timer : MonoBehaviour
         // Инициализируем таймер
         currentTime = initialTimeInSeconds;
         UpdateTimerDisplay();
+        
+        // Если GameManager не назначен, пытаемся найти его
+        if (gameManager == null)
+        {
+            gameManager = FindObjectOfType<GameManager>();
+        }
     }
     
     private void Update()
@@ -36,6 +46,17 @@ public class Timer : MonoBehaviour
                 currentTime = 0;
                 isRunning = false;
                 OnTimerFinished?.Invoke();
+                
+                // Вызываем окончание игры через GameManager
+                if (gameManager != null)
+                {
+                    Debug.Log("Timer: Время истекло! Вызываем ShowEndGameUI()");
+                    gameManager.ShowEndGameUI();
+                }
+                else
+                {
+                    Debug.LogWarning("Timer: GameManager не найден! Не удалось вызвать ShowEndGameUI()");
+                }
             }
             
             // Обновляем отображение

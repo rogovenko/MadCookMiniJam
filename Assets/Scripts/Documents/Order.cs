@@ -52,6 +52,13 @@ public class Order : Paper
     [Tooltip("Рецепт для этого заказа")]
     [SerializeField] private RecipeData orderRecipe;
     
+    [Header("Штампы результата")]
+    [Tooltip("Штамп успеха (зеленая галочка)")]
+    [SerializeField] private GameObject successStamp;
+    
+    [Tooltip("Штамп неудачи (красный крестик)")]
+    [SerializeField] private GameObject failStamp;
+    
     private Dictionary<CharacterType, Sprite> stickerSprites = new Dictionary<CharacterType, Sprite>();
     
     protected override void Start()
@@ -478,6 +485,63 @@ public class Order : Paper
         }
     }
     
+    // Показать штамп результата
+    public void ShowResultStamp(bool isSuccess)
+    {
+        // Сначала скрываем оба штампа
+        if (successStamp != null)
+        {
+            successStamp.SetActive(false);
+        }
+        
+        if (failStamp != null)
+        {
+            failStamp.SetActive(false);
+        }
+        
+        // Показываем нужный штамп
+        if (isSuccess)
+        {
+            if (successStamp != null)
+            {
+                successStamp.SetActive(true);
+                Debug.Log("Order: Показан штамп успеха");
+            }
+            else
+            {
+                Debug.LogWarning("Order: SuccessStamp не назначен в инспекторе!");
+            }
+        }
+        else
+        {
+            if (failStamp != null)
+            {
+                failStamp.SetActive(true);
+                Debug.Log("Order: Показан штамп неудачи");
+            }
+            else
+            {
+                Debug.LogWarning("Order: FailStamp не назначен в инспекторе!");
+            }
+        }
+    }
+    
+    // Скрыть все штампы
+    public void HideResultStamps()
+    {
+        if (successStamp != null)
+        {
+            successStamp.SetActive(false);
+        }
+        
+        if (failStamp != null)
+        {
+            failStamp.SetActive(false);
+        }
+        
+        Debug.Log("Order: Все штампы скрыты");
+    }
+    
     private void SetupButtonComponent()
     {
         // Получаем или добавляем Button компонент
@@ -486,6 +550,16 @@ public class Order : Paper
         {
             button = gameObject.AddComponent<Button>();
         }
+        
+        // Настраиваем цвета кнопки - отключаем все изменения цвета и альфы
+        ColorBlock colors = button.colors;
+        colors.normalColor = Color.white;
+        colors.highlightedColor = Color.white;
+        colors.pressedColor = Color.white;
+        colors.selectedColor = Color.white;
+        colors.disabledColor = Color.white;
+        colors.fadeDuration = 0f; // Отключаем анимацию перехода
+        button.colors = colors;
         
         // Очищаем существующие события
         button.onClick.RemoveAllListeners();

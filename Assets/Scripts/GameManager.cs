@@ -32,7 +32,17 @@ public class GameManager : MonoBehaviour
     [Tooltip("Canvas для экрана окончания игры")]
     [SerializeField] private Canvas endGameCanvas;
     
-    [Header("Рецепты уровня")]
+    [Tooltip("EndGameManager для управления экраном окончания игры")]
+    [SerializeField] private EndGameManager endGameManager;
+    
+    [Header("Система уровней")]
+    [Tooltip("Текущий уровень (начинается с 0)")]
+    [SerializeField] private int currentLevel = 0;
+    
+    [Tooltip("Список всех уровней")]
+    [SerializeField] private List<LevelData> levels = new List<LevelData>();
+    
+    [Header("Рецепты текущего уровня")]
     [Tooltip("Рецепты, которые нужно выполнить на текущем уровне")]
     public List<RecipeData> currentLevelRecipes = new List<RecipeData>();
     
@@ -48,6 +58,9 @@ public class GameManager : MonoBehaviour
     
     [Tooltip("Оффсет между заказами по оси X")]
     public float orderOffsetX = 2f;
+    
+    [Tooltip("Счетчик заказов для вычисления оффсета")]
+    [SerializeField] private int orderCount = 0;
     
     [Header("Настройки игры")]
     [Tooltip("Создать персонажа при старте игры")]
@@ -89,6 +102,16 @@ public class GameManager : MonoBehaviour
     
     [Tooltip("Время добавляемое за ошибку")]
     [SerializeField] private float addTimerMistake = 30f;
+    
+    [Header("Отслеживание заказов")]
+    [Tooltip("Количество отправленных заказов")]
+    [SerializeField] private int completedOrdersCount = 0;
+    
+    [Tooltip("Общее количество заказов на уровне")]
+    [SerializeField] private int totalOrdersCount = 0;
+    
+    [Tooltip("Флаг для предотвращения повторного вызова ShowEndGameUI")]
+    [SerializeField] private bool endGameTriggered = false;
     
     private System.DateTime gameCurrentDate;
     
@@ -196,6 +219,21 @@ public class GameManager : MonoBehaviour
             }
         }
         
+        // Проверяем наличие EndGameManager
+        if (endGameManager == null)
+        {
+            endGameManager = FindObjectOfType<EndGameManager>();
+            if (endGameManager == null)
+            {
+                Debug.LogWarning("GameManager: EndGameManager не найден на сцене!");
+            }
+            else
+            {
+                // Устанавливаем ссылку на GameManager в EndGameManager
+                endGameManager.SetGameManager(this);
+            }
+        }
+        
         // Подписываемся на событие готовности очереди
         if (queueManager != null)
         {
@@ -213,6 +251,43 @@ public class GameManager : MonoBehaviour
         
         // Обновляем календарь из игровой даты
         UpdateCalendarFromGameDate();
+        
+        // Загружаем и запускаем текущий уровень
+        LoadAndStartCurrentLevel();
+    }
+    
+    // Загрузить и запустить текущий уровень
+    private void LoadAndStartCurrentLevel()
+    {
+        Debug.Log($"GameManager: Загружаем уровень {currentLevel}");
+        
+        // Проверяем, есть ли уровни
+        if (levels == null || levels.Count == 0)
+        {
+            Debug.LogError("GameManager: Список уровней пуст! Нечего загружать.");
+            return;
+        }
+        
+        // Проверяем, не вышли ли за пределы уровней
+        if (currentLevel >= levels.Count)
+        {
+            Debug.LogWarning($"GameManager: Уровень {currentLevel} не существует! Максимум: {levels.Count - 1}");
+            return;
+        }
+        
+        // Получаем данные текущего уровня
+        LevelData levelData = levels[currentLevel];
+        if (levelData == null)
+        {
+            Debug.LogError($"GameManager: Данные уровня {currentLevel} не найдены!");
+            return;
+        }
+        
+        // Загружаем рецепты уровня
+        currentLevelRecipes = new List<RecipeData>(levelData.recipes);
+        
+        Debug.Log($"GameManager: Загружен уровень {currentLevel}");
+        Debug.Log($"GameManager: Рецептов: {levelData.GetRecipeCount()}");
         
         // Создаем очередь при старте
         if (createQueueOnStart)
@@ -575,6 +650,13 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        // Сбрасываем счетчики заказов
+        completedOrdersCount = 0;
+        totalOrdersCount = currentLevelRecipes.Count;
+        endGameTriggered = false; // Сбрасываем флаг окончания игры
+        
+        Debug.Log($"GameManager: Инициализируем {totalOrdersCount} заказов");
+
         foreach (RecipeData recipe in currentLevelRecipes)
         {
             if (recipe != null && !string.IsNullOrEmpty(recipe.recipeName))
@@ -625,6 +707,9 @@ public class GameManager : MonoBehaviour
         {
             // Используем корутину чтобы дождаться Start()
             StartCoroutine(SetOrderAfterStart(orderComponent, recipe));
+            
+            // Увеличиваем счетчик заказов
+            IncrementOrderCount();
         }
         else
         {
@@ -646,9 +731,19 @@ public class GameManager : MonoBehaviour
     // Получить количество текущих заказов (для вычисления оффсета)
     private int GetCurrentOrderCount()
     {
-        // Ищем все объекты с компонентом Order на сцене
-        Order[] existingOrders = FindObjectsOfType<Order>();
-        return existingOrders.Length;
+        return orderCount;
+    }
+    
+    // Увеличить счетчик заказов
+    private void IncrementOrderCount()
+    {
+        orderCount++;
+    }
+    
+    // Сбросить счетчик заказов
+    private void ResetOrderCount()
+    {
+        orderCount = 0;
     }
     
     // Вызывается когда очередь готова
@@ -1000,6 +1095,9 @@ public class GameManager : MonoBehaviour
         
         Debug.Log($"GameManager: Проверяем заказ '{order.name}'");
         
+        // Увеличиваем счетчик завершенных заказов (для всех заказов)
+        IncrementCompletedOrders();
+        
         // Сначала проверяем правильность собранных ингредиентов
         bool ingredientsCorrect = order.CheckIngredientsCorrectness();
         if (!ingredientsCorrect)
@@ -1146,6 +1244,13 @@ public class GameManager : MonoBehaviour
     // Показать экран окончания игры
     public void ShowEndGameUI()
     {
+        if (endGameTriggered)
+        {
+            Debug.Log("GameManager: ShowEndGameUI уже был вызван, игнорируем повторный вызов");
+            return;
+        }
+        
+        endGameTriggered = true; // Устанавливаем флаг сразу в начале
         Debug.Log("GameManager: Показываем экран окончания игры...");
         
         // Останавливаем таймер если он активен
@@ -1153,6 +1258,20 @@ public class GameManager : MonoBehaviour
         {
             gameTimer.StopTimer();
         }
+        
+        // Запускаем корутину с задержкой для плавного перехода
+        StartCoroutine(ShowEndGameUIWithDelay());
+    }
+    
+    // Корутина для показа экрана окончания игры с задержкой
+    private System.Collections.IEnumerator ShowEndGameUIWithDelay()
+    {
+        Debug.Log("GameManager: Даем игроку 5 секунд на отдых...");
+        
+        // Ждем 5 секунд
+        yield return new WaitForSeconds(5f);
+        
+        Debug.Log("GameManager: Показываем экран окончания игры после задержки");
         
         // Отключаем drag'n'drop
         DisableDragDrop();
@@ -1176,6 +1295,16 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError("GameManager: EndGameCanvas не найден! Не удалось показать экран окончания игры.");
         }
+        
+        // Показываем экран окончания игры через EndGameManager
+        if (endGameManager != null)
+        {
+            endGameManager.ShowEndGameScreen();
+        }
+        else
+        {
+            Debug.LogWarning("GameManager: EndGameManager не найден! Не удалось показать детальный экран окончания игры.");
+        }
     }
     
     // Скрыть экран окончания игры
@@ -1188,6 +1317,193 @@ public class GameManager : MonoBehaviour
             endGameCanvas.gameObject.SetActive(false);
             Debug.Log("GameManager: EndGameCanvas деактивирован");
         }
+    }
+    
+    // Получить все заказы на сцене
+    public List<Order> GetAllOrders()
+    {
+        List<Order> allOrders = new List<Order>();
+        
+        // Ищем все объекты с компонентом Order
+        Order[] orders = FindObjectsOfType<Order>();
+        allOrders.AddRange(orders);
+        
+        Debug.Log($"GameManager: Найдено {allOrders.Count} заказов на сцене");
+        return allOrders;
+    }
+    
+    // Увеличить счетчик завершенных заказов
+    public void IncrementCompletedOrders()
+    {
+        completedOrdersCount++;
+        Debug.Log($"GameManager: Заказ завершен! Прогресс: {completedOrdersCount}/{totalOrdersCount}");
+        
+        // Проверяем, все ли заказы завершены
+        CheckAllOrdersDone();
+    }
+    
+    // Проверить, все ли заказы завершены
+    public void CheckAllOrdersDone()
+    {
+        if (completedOrdersCount >= totalOrdersCount && totalOrdersCount > 0 && !endGameTriggered)
+        {
+            Debug.Log($"GameManager: Все заказы завершены! ({completedOrdersCount}/{totalOrdersCount})");
+            
+            // Проверяем, есть ли следующий уровень
+            ShowEndGameUI();
+        }
+        else
+        {
+            Debug.Log($"GameManager: Прогресс заказов: {completedOrdersCount}/{totalOrdersCount}");
+        }
+    }
+    
+    // Получить количество завершенных заказов
+    public int GetCompletedOrdersCount()
+    {
+        return completedOrdersCount;
+    }
+    
+    // Получить общее количество заказов
+    public int GetTotalOrdersCount()
+    {
+        return totalOrdersCount;
+    }
+    
+    // Перейти на следующий уровень
+    public void NextLevel()
+    {
+        currentLevel++;
+        Debug.Log($"GameManager: Переходим на уровень {currentLevel}");
+        
+        // Подготавливаем игру к новому уровню
+        PrepareGameForNextLevel();
+        
+        // Загружаем новый уровень
+        LoadAndStartCurrentLevel();
+    }
+    
+    // Подготовить игру к следующему уровню
+    private void PrepareGameForNextLevel()
+    {
+        Debug.Log("GameManager: Подготавливаем игру к следующему уровню...");
+        
+        // Сбрасываем счетчики
+        completedOrdersCount = 0;
+        totalOrdersCount = 0;
+        endGameTriggered = false;
+        ResetOrderCount(); // Сбрасываем счетчик заказов
+        
+        // Уничтожаем текущего персонажа
+        if (currentCharacter != null)
+        {
+            Debug.Log("GameManager: Уничтожаем текущего персонажа");
+            Destroy(currentCharacter);
+            currentCharacter = null;
+        }
+        
+        // Уничтожаем текущую бумажку
+        if (currentPaper != null)
+        {
+            Debug.Log("GameManager: Уничтожаем текущую бумажку");
+            Destroy(currentPaper);
+            currentPaper = null;
+        }
+        
+        // Очищаем очередь персонажей
+        if (queueManager != null)
+        {
+            Debug.Log("GameManager: Очищаем очередь персонажей");
+            queueManager.ClearQueue();
+        }
+        
+        // Уничтожаем все заказы на сцене
+        Order[] existingOrders = FindObjectsOfType<Order>();
+        if (existingOrders.Length > 0)
+        {
+            Debug.Log($"GameManager: Уничтожаем {existingOrders.Length} заказов");
+            foreach (Order order in existingOrders)
+            {
+                if (order != null)
+                {
+                    Destroy(order.gameObject);
+                }
+            }
+        }
+        
+        // Уничтожаем все бумажки на сцене
+        Paper[] existingPapers = FindObjectsOfType<Paper>();
+        if (existingPapers.Length > 0)
+        {
+            Debug.Log($"GameManager: Уничтожаем {existingPapers.Length} бумажек");
+            foreach (Paper paper in existingPapers)
+            {
+                if (paper != null && paper != currentPaper)
+                {
+                    Destroy(paper.gameObject);
+                }
+            }
+        }
+        
+        // Уничтожаем всех персонажей на сцене
+        Character[] existingCharacters = FindObjectsOfType<Character>();
+        if (existingCharacters.Length > 0)
+        {
+            Debug.Log($"GameManager: Уничтожаем {existingCharacters.Length} персонажей");
+            foreach (Character character in existingCharacters)
+            {
+                if (character != null)
+                {
+                    Destroy(character.gameObject);
+                }
+            }
+        }
+        
+        // Сбрасываем таймер
+        if (gameTimer != null)
+        {
+            Debug.Log("GameManager: Сбрасываем таймер");
+            gameTimer.ResetTimer();
+        }
+        
+        // Включаем drag'n'drop
+        EnableDragDrop();
+        
+        // Отключаем режим выбора заказа
+        SetChooseOrderMode(false);
+        
+        // Активируем кнопку Tasty
+        MakeTastyButtonActive();
+        
+        Debug.Log("GameManager: Игра подготовлена к новому уровню");
+    }
+    
+    // Получить текущий уровень
+    public int GetCurrentLevel()
+    {
+        return currentLevel;
+    }
+    
+    // Получить общее количество уровней
+    public int GetTotalLevels()
+    {
+        return levels != null ? levels.Count : 0;
+    }
+    
+    // Проверить, есть ли следующий уровень
+    public bool HasNextLevel()
+    {
+        return currentLevel + 1 < GetTotalLevels();
+    }
+    
+    // Получить данные текущего уровня
+    public LevelData GetCurrentLevelData()
+    {
+        if (levels != null && currentLevel < levels.Count)
+        {
+            return levels[currentLevel];
+        }
+        return null;
     }
     
     private void OnDestroy()
