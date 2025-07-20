@@ -134,4 +134,23 @@ public class EndGameManager : MonoBehaviour
     {
         orderSpawn = spawn;
     }
+    
+    // Перейти на следующий уровень
+    public void NextLevel()
+    {
+        if (gameManager != null)
+        {
+            Debug.Log("EndGameManager: Переходим на следующий уровень");
+            
+            // Переходим на следующий уровень через GameManager
+            gameManager.NextLevel();
+            
+            // Скрываем экран окончания игры
+            HideEndGameScreen();
+        }
+        else
+        {
+            Debug.LogError("EndGameManager: GameManager не найден! Не удалось перейти на следующий уровень");
+        }
+    }
 }

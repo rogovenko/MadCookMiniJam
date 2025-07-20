@@ -35,7 +35,14 @@ public class GameManager : MonoBehaviour
     [Tooltip("EndGameManager для управления экраном окончания игры")]
     [SerializeField] private EndGameManager endGameManager;
     
-    [Header("Рецепты уровня")]
+    [Header("Система уровней")]
+    [Tooltip("Текущий уровень (начинается с 0)")]
+    [SerializeField] private int currentLevel = 0;
+    
+    [Tooltip("Список всех уровней")]
+    [SerializeField] private List<LevelData> levels = new List<LevelData>();
+    
+    [Header("Рецепты текущего уровня")]
     [Tooltip("Рецепты, которые нужно выполнить на текущем уровне")]
     public List<RecipeData> currentLevelRecipes = new List<RecipeData>();
     
@@ -51,6 +58,9 @@ public class GameManager : MonoBehaviour
     
     [Tooltip("Оффсет между заказами по оси X")]
     public float orderOffsetX = 2f;
+    
+    [Tooltip("Счетчик заказов для вычисления оффсета")]
+    [SerializeField] private int orderCount = 0;
     
     [Header("Настройки игры")]
     [Tooltip("Создать персонажа при старте игры")]
@@ -241,6 +251,43 @@ public class GameManager : MonoBehaviour
         
         // Обновляем календарь из игровой даты
         UpdateCalendarFromGameDate();
+        
+        // Загружаем и запускаем текущий уровень
+        LoadAndStartCurrentLevel();
+    }
+    
+    // Загрузить и запустить текущий уровень
+    private void LoadAndStartCurrentLevel()
+    {
+        Debug.Log($"GameManager: Загружаем уровень {currentLevel}");
+        
+        // Проверяем, есть ли уровни
+        if (levels == null || levels.Count == 0)
+        {
+            Debug.LogError("GameManager: Список уровней пуст! Нечего загружать.");
+            return;
+        }
+        
+        // Проверяем, не вышли ли за пределы уровней
+        if (currentLevel >= levels.Count)
+        {
+            Debug.LogWarning($"GameManager: Уровень {currentLevel} не существует! Максимум: {levels.Count - 1}");
+            return;
+        }
+        
+        // Получаем данные текущего уровня
+        LevelData levelData = levels[currentLevel];
+        if (levelData == null)
+        {
+            Debug.LogError($"GameManager: Данные уровня {currentLevel} не найдены!");
+            return;
+        }
+        
+        // Загружаем рецепты уровня
+        currentLevelRecipes = new List<RecipeData>(levelData.recipes);
+        
+        Debug.Log($"GameManager: Загружен уровень {currentLevel}");
+        Debug.Log($"GameManager: Рецептов: {levelData.GetRecipeCount()}");
         
         // Создаем очередь при старте
         if (createQueueOnStart)
@@ -660,6 +707,9 @@ public class GameManager : MonoBehaviour
         {
             // Используем корутину чтобы дождаться Start()
             StartCoroutine(SetOrderAfterStart(orderComponent, recipe));
+            
+            // Увеличиваем счетчик заказов
+            IncrementOrderCount();
         }
         else
         {
@@ -681,9 +731,19 @@ public class GameManager : MonoBehaviour
     // Получить количество текущих заказов (для вычисления оффсета)
     private int GetCurrentOrderCount()
     {
-        // Ищем все объекты с компонентом Order на сцене
-        Order[] existingOrders = FindObjectsOfType<Order>();
-        return existingOrders.Length;
+        return orderCount;
+    }
+    
+    // Увеличить счетчик заказов
+    private void IncrementOrderCount()
+    {
+        orderCount++;
+    }
+    
+    // Сбросить счетчик заказов
+    private void ResetOrderCount()
+    {
+        orderCount = 0;
     }
     
     // Вызывается когда очередь готова
@@ -1288,7 +1348,8 @@ public class GameManager : MonoBehaviour
         if (completedOrdersCount >= totalOrdersCount && totalOrdersCount > 0 && !endGameTriggered)
         {
             Debug.Log($"GameManager: Все заказы завершены! ({completedOrdersCount}/{totalOrdersCount})");
-            Debug.Log("GameManager: Вызываем ShowEndGameUI()");
+            
+            // Проверяем, есть ли следующий уровень
             ShowEndGameUI();
         }
         else
@@ -1307,6 +1368,142 @@ public class GameManager : MonoBehaviour
     public int GetTotalOrdersCount()
     {
         return totalOrdersCount;
+    }
+    
+    // Перейти на следующий уровень
+    public void NextLevel()
+    {
+        currentLevel++;
+        Debug.Log($"GameManager: Переходим на уровень {currentLevel}");
+        
+        // Подготавливаем игру к новому уровню
+        PrepareGameForNextLevel();
+        
+        // Загружаем новый уровень
+        LoadAndStartCurrentLevel();
+    }
+    
+    // Подготовить игру к следующему уровню
+    private void PrepareGameForNextLevel()
+    {
+        Debug.Log("GameManager: Подготавливаем игру к следующему уровню...");
+        
+        // Сбрасываем счетчики
+        completedOrdersCount = 0;
+        totalOrdersCount = 0;
+        endGameTriggered = false;
+        ResetOrderCount(); // Сбрасываем счетчик заказов
+        
+        // Уничтожаем текущего персонажа
+        if (currentCharacter != null)
+        {
+            Debug.Log("GameManager: Уничтожаем текущего персонажа");
+            Destroy(currentCharacter);
+            currentCharacter = null;
+        }
+        
+        // Уничтожаем текущую бумажку
+        if (currentPaper != null)
+        {
+            Debug.Log("GameManager: Уничтожаем текущую бумажку");
+            Destroy(currentPaper);
+            currentPaper = null;
+        }
+        
+        // Очищаем очередь персонажей
+        if (queueManager != null)
+        {
+            Debug.Log("GameManager: Очищаем очередь персонажей");
+            queueManager.ClearQueue();
+        }
+        
+        // Уничтожаем все заказы на сцене
+        Order[] existingOrders = FindObjectsOfType<Order>();
+        if (existingOrders.Length > 0)
+        {
+            Debug.Log($"GameManager: Уничтожаем {existingOrders.Length} заказов");
+            foreach (Order order in existingOrders)
+            {
+                if (order != null)
+                {
+                    Destroy(order.gameObject);
+                }
+            }
+        }
+        
+        // Уничтожаем все бумажки на сцене
+        Paper[] existingPapers = FindObjectsOfType<Paper>();
+        if (existingPapers.Length > 0)
+        {
+            Debug.Log($"GameManager: Уничтожаем {existingPapers.Length} бумажек");
+            foreach (Paper paper in existingPapers)
+            {
+                if (paper != null && paper != currentPaper)
+                {
+                    Destroy(paper.gameObject);
+                }
+            }
+        }
+        
+        // Уничтожаем всех персонажей на сцене
+        Character[] existingCharacters = FindObjectsOfType<Character>();
+        if (existingCharacters.Length > 0)
+        {
+            Debug.Log($"GameManager: Уничтожаем {existingCharacters.Length} персонажей");
+            foreach (Character character in existingCharacters)
+            {
+                if (character != null)
+                {
+                    Destroy(character.gameObject);
+                }
+            }
+        }
+        
+        // Сбрасываем таймер
+        if (gameTimer != null)
+        {
+            Debug.Log("GameManager: Сбрасываем таймер");
+            gameTimer.ResetTimer();
+        }
+        
+        // Включаем drag'n'drop
+        EnableDragDrop();
+        
+        // Отключаем режим выбора заказа
+        SetChooseOrderMode(false);
+        
+        // Активируем кнопку Tasty
+        MakeTastyButtonActive();
+        
+        Debug.Log("GameManager: Игра подготовлена к новому уровню");
+    }
+    
+    // Получить текущий уровень
+    public int GetCurrentLevel()
+    {
+        return currentLevel;
+    }
+    
+    // Получить общее количество уровней
+    public int GetTotalLevels()
+    {
+        return levels != null ? levels.Count : 0;
+    }
+    
+    // Проверить, есть ли следующий уровень
+    public bool HasNextLevel()
+    {
+        return currentLevel + 1 < GetTotalLevels();
+    }
+    
+    // Получить данные текущего уровня
+    public LevelData GetCurrentLevelData()
+    {
+        if (levels != null && currentLevel < levels.Count)
+        {
+            return levels[currentLevel];
+        }
+        return null;
     }
     
     private void OnDestroy()
