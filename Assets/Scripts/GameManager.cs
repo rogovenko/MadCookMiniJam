@@ -211,7 +211,8 @@ public class GameManager : MonoBehaviour
             if (endGameCanvas != null && endGameCanvas.name.Contains("EndGame"))
             {
                 // Отключаем EndGameCanvas по умолчанию
-                endGameCanvas.gameObject.SetActive(false);
+                // TODO вернуть
+                // endGameCanvas.gameObject.SetActive(false);
             }
             else
             {
@@ -1351,7 +1352,8 @@ public class GameManager : MonoBehaviour
         
         if (endGameCanvas != null)
         {
-            endGameCanvas.gameObject.SetActive(false);
+            // TODO вернуть
+            // endGameCanvas.gameObject.SetActive(false);
             Debug.Log("GameManager: EndGameCanvas деактивирован");
         }
     }

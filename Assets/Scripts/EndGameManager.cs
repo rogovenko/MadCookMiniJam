@@ -29,7 +29,8 @@ public class EndGameManager : MonoBehaviour
         }
         
         // Скрываем UI по умолчанию
-        gameObject.SetActive(false);
+        // TODO вернуть
+        // gameObject.SetActive(false);
     }
     
     // Показать экран окончания игры
