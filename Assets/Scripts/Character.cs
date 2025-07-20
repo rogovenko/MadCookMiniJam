@@ -200,6 +200,18 @@ public class Character : MonoBehaviour
         return currentDefect;
     }
     
+    // Получить спрайт персонажа (тело)
+    public Sprite GetCharacterSprite()
+    {
+        return bodyImage != null ? bodyImage.sprite : null;
+    }
+    
+    // Получить спрайт глаз
+    public Sprite GetEyesSprite()
+    {
+        return eyesImage != null ? eyesImage.sprite : null;
+    }
+    
     // Проверить, была ли уже запрошена бумажка
     public bool HasBeenAskedForPapers()
     {

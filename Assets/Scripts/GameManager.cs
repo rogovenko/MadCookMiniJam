@@ -914,7 +914,44 @@ public class GameManager : MonoBehaviour
                     string paperText = characterComponent.GetFullTextInfo();
 
                     // Создаем бумажку и сохраняем ссылку на неё
-                    currentPaper = paperSpawner.SpawnPaper(paperText);
+                    currentPaper = paperSpawner.SpawnPassport(paperText);
+                    
+                    // Применяем спрайты персонажа на бумагу
+                    if (currentPaper != null)
+                    {
+                        Paper paperComponent = currentPaper.GetComponent<Paper>();
+                        if (paperComponent != null)
+                        {
+                            // Получаем спрайты из Character
+                            Sprite characterSprite = characterComponent.GetCharacterSprite();
+                            Sprite eyesSprite = characterComponent.GetEyesSprite();
+                            
+                            // Применяем спрайты на бумагу
+                            if (characterSprite != null)
+                            {
+                                paperComponent.SetBodyImage(characterSprite);
+                                Debug.Log($"GameManager: Применен спрайт персонажа на бумагу {currentPaper.name}");
+                            }
+                            else
+                            {
+                                Debug.LogWarning($"GameManager: Спрайт персонажа не найден для {characterComponent.name}");
+                            }
+                            
+                            if (eyesSprite != null)
+                            {
+                                paperComponent.SetEyesImage(eyesSprite);
+                                Debug.Log($"GameManager: Применен спрайт глаз на бумагу {currentPaper.name}");
+                            }
+                            else
+                            {
+                                Debug.LogWarning($"GameManager: Спрайт глаз не найден для {characterComponent.name}");
+                            }
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"GameManager: На созданной бумаге отсутствует компонент Paper!");
+                        }
+                    }
                 }
                 else
                 {
@@ -1431,18 +1468,29 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        // Уничтожаем все бумажки на сцене
+        // Уничтожаем все бумажки на сцене (кроме Diary)
         Paper[] existingPapers = FindObjectsOfType<Paper>();
         if (existingPapers.Length > 0)
         {
-            Debug.Log($"GameManager: Уничтожаем {existingPapers.Length} бумажек");
+            int destroyedCount = 0;
             foreach (Paper paper in existingPapers)
             {
                 if (paper != null && paper != currentPaper)
                 {
-                    Destroy(paper.gameObject);
+                    // Проверяем, не является ли бумага дневником
+                    Diary diary = paper.GetComponent<Diary>();
+                    if (diary == null) // Если это не дневник
+                    {
+                        Destroy(paper.gameObject);
+                        destroyedCount++;
+                    }
+                    else
+                    {
+                        Debug.Log($"GameManager: Пропускаем дневник {paper.name} (не уничтожаем)");
+                    }
                 }
             }
+            Debug.Log($"GameManager: Уничтожаем {destroyedCount} бумажек (дневники сохранены)");
         }
         
         // Уничтожаем всех персонажей на сцене

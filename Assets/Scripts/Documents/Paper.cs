@@ -7,6 +7,13 @@ public class Paper : Draggable
     public UnityEngine.UI.Image paperImage;
     public TextMeshProUGUI paperText;
     
+    [Header("Дополнительные изображения")]
+    [Tooltip("Изображение тела (может быть пустым)")]
+    public UnityEngine.UI.Image bodyImage;
+    
+    [Tooltip("Изображение глаз (может быть пустым)")]
+    public UnityEngine.UI.Image eyesImage;
+    
     [Header("Содержимое бумаги")]
     public string paperContent = "Sample Document";
     
@@ -141,6 +148,38 @@ public class Paper : Draggable
     public bool IsOnShelf()
     {
         return rectTransform.localScale == shelfScale;
+    }
+    
+    // Методы для работы с дополнительными изображениями
+    
+    // Установить изображение тела
+    public void SetBodyImage(Sprite sprite)
+    {
+        if (bodyImage != null)
+        {
+            bodyImage.sprite = sprite;
+            bodyImage.enabled = sprite != null;
+            Debug.Log($"Paper: Установлено изображение тела для {name}");
+        }
+        else
+        {
+            Debug.LogWarning($"Paper: Компонент bodyImage не назначен на {name}");
+        }
+    }
+    
+    // Установить изображение глаз
+    public void SetEyesImage(Sprite sprite)
+    {
+        if (eyesImage != null)
+        {
+            eyesImage.sprite = sprite;
+            eyesImage.enabled = sprite != null;
+            Debug.Log($"Paper: Установлено изображение глаз для {name}");
+        }
+        else
+        {
+            Debug.LogWarning($"Paper: Компонент eyesImage не назначен на {name}");
+        }
     }
 
     // Уменьшить бумагу и центрировать под курсором, обновить offset для drag
