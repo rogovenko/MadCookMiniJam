@@ -152,6 +152,12 @@ public class Hands : MonoBehaviour
             Debug.LogWarning("Hands: EndGameManager не найден!");
         }
         
+        // Воспроизводим звук отрезания пальца
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayTrash(); // Используем звук trash для отрезания пальца
+        }
+        
         Debug.Log($"Hands: Отрезан палец! Рука: {(isLeftHand ? "левая" : "правая")}, палец: {fingerIndex}");
     }
     
