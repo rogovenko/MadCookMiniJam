@@ -8,9 +8,6 @@ public class TastyButton : MonoBehaviour
     [Tooltip("Image компонент кнопки")]
     [SerializeField] private Image buttonImage;
     
-    [Tooltip("Text компонент кнопки")]
-    [SerializeField] private TextMeshProUGUI buttonText;
-    
     [Header("Sprites")]
     [Tooltip("Спрайт активного состояния (CancelUp)")]
     [SerializeField] private Sprite activeSprite;
@@ -74,12 +71,6 @@ public class TastyButton : MonoBehaviour
         if (buttonImage != null)
         {
             buttonImage.sprite = isActivated ? activeSprite : inactiveSprite;
-        }
-        
-        // Обновляем текст
-        if (buttonText != null)
-        {
-            buttonText.text = isActivated ? activeText : inactiveText;
         }
         
         // Обновляем интерактивность кнопки

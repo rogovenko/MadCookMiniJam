@@ -28,6 +28,9 @@ public class GameManager : MonoBehaviour
     [Tooltip("Календарь")]
     public Calendar calendar;
     
+    [Tooltip("Игра с пальцами")]
+    public HandsGame handsGame;
+    
     [Header("End Game UI")]
     [Tooltip("Canvas для экрана окончания игры")]
     [SerializeField] private Canvas endGameCanvas;
@@ -211,6 +214,7 @@ public class GameManager : MonoBehaviour
             if (endGameCanvas != null && endGameCanvas.name.Contains("EndGame"))
             {
                 // Отключаем EndGameCanvas по умолчанию
+                // TODO вернуть
                 endGameCanvas.gameObject.SetActive(false);
             }
             else
@@ -914,7 +918,44 @@ public class GameManager : MonoBehaviour
                     string paperText = characterComponent.GetFullTextInfo();
 
                     // Создаем бумажку и сохраняем ссылку на неё
-                    currentPaper = paperSpawner.SpawnPaper(paperText);
+                    currentPaper = paperSpawner.SpawnPassport(paperText);
+                    
+                    // Применяем спрайты персонажа на бумагу
+                    if (currentPaper != null)
+                    {
+                        Paper paperComponent = currentPaper.GetComponent<Paper>();
+                        if (paperComponent != null)
+                        {
+                            // Получаем спрайты из Character
+                            Sprite characterSprite = characterComponent.GetCharacterSprite();
+                            Sprite eyesSprite = characterComponent.GetEyesSprite();
+                            
+                            // Применяем спрайты на бумагу
+                            if (characterSprite != null)
+                            {
+                                paperComponent.SetBodyImage(characterSprite);
+                                Debug.Log($"GameManager: Применен спрайт персонажа на бумагу {currentPaper.name}");
+                            }
+                            else
+                            {
+                                Debug.LogWarning($"GameManager: Спрайт персонажа не найден для {characterComponent.name}");
+                            }
+                            
+                            if (eyesSprite != null)
+                            {
+                                paperComponent.SetEyesImage(eyesSprite);
+                                Debug.Log($"GameManager: Применен спрайт глаз на бумагу {currentPaper.name}");
+                            }
+                            else
+                            {
+                                Debug.LogWarning($"GameManager: Спрайт глаз не найден для {characterComponent.name}");
+                            }
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"GameManager: На созданной бумаге отсутствует компонент Paper!");
+                        }
+                    }
                 }
                 else
                 {
@@ -1314,6 +1355,7 @@ public class GameManager : MonoBehaviour
         
         if (endGameCanvas != null)
         {
+            // TODO вернуть
             endGameCanvas.gameObject.SetActive(false);
             Debug.Log("GameManager: EndGameCanvas деактивирован");
         }
@@ -1431,18 +1473,29 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        // Уничтожаем все бумажки на сцене
+        // Уничтожаем все бумажки на сцене (кроме Diary)
         Paper[] existingPapers = FindObjectsOfType<Paper>();
         if (existingPapers.Length > 0)
         {
-            Debug.Log($"GameManager: Уничтожаем {existingPapers.Length} бумажек");
+            int destroyedCount = 0;
             foreach (Paper paper in existingPapers)
             {
                 if (paper != null && paper != currentPaper)
                 {
-                    Destroy(paper.gameObject);
+                    // Проверяем, не является ли бумага дневником
+                    Diary diary = paper.GetComponent<Diary>();
+                    if (diary == null) // Если это не дневник
+                    {
+                        Destroy(paper.gameObject);
+                        destroyedCount++;
+                    }
+                    else
+                    {
+                        Debug.Log($"GameManager: Пропускаем дневник {paper.name} (не уничтожаем)");
+                    }
                 }
             }
+            Debug.Log($"GameManager: Уничтожаем {destroyedCount} бумажек (дневники сохранены)");
         }
         
         // Уничтожаем всех персонажей на сцене
@@ -1504,6 +1557,20 @@ public class GameManager : MonoBehaviour
             return levels[currentLevel];
         }
         return null;
+    }
+    
+    // Скрыть палец
+    public void HideFinger(bool isLeftHand, int fingerIndex)
+    {
+        if (handsGame != null)
+        {
+            handsGame.HideFinger(isLeftHand, fingerIndex);
+            Debug.Log($"GameManager: Скрыт палец через GameManager. Рука: {(isLeftHand ? "левая" : "правая")}, палец: {fingerIndex}");
+        }
+        else
+        {
+            Debug.LogWarning("GameManager: Компонент HandsGame не найден!");
+        }
     }
     
     private void OnDestroy()

@@ -26,6 +26,19 @@ public class SendZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     [Range(0f, 1f)]
     [SerializeField] private float highlightAlpha = 0.3f;
     
+    [Header("Анимация завершения заказа")]
+    [Tooltip("Длительность анимации завершения заказа")]
+    [SerializeField] private float orderCompleteAnimationDuration = 1f;
+    
+    [Tooltip("Смещение по Y для анимации (отрицательное = вниз)")]
+    [SerializeField] private float orderCompleteYOffset = -200f;
+    
+    [Tooltip("Финальный масштаб заказа")]
+    [SerializeField] private Vector3 orderCompleteFinalScale = new Vector3(0.3f, 0.3f, 0.3f);
+    
+    [Tooltip("Элемент после которого размещать заказ в иерархии")]
+    [SerializeField] private Transform hierarchyTargetElement;
+    
     private UnityEngine.UI.Image zoneImage;
     private Color originalColor;
     private bool isHighlighted = false;
@@ -248,7 +261,7 @@ public class SendZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
                 orderRect.localPosition = sendZoneRect.localPosition;
                 
                 // Устанавливаем масштаб 1,1,1
-                orderRect.localScale = Vector3.one;
+                orderRect.localScale = new Vector3(0.5f, 0.5f, 0.5f);
                 
                 // Устанавливаем угол поворота 0
                 orderRect.localRotation = Quaternion.identity;
@@ -260,7 +273,24 @@ public class SendZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
                     draggable.enabled = false;
                 }
                 
-                Debug.Log($"SendZone: Order {order.name} размещен в SendZone с нормальным масштабом и углом");
+                // Размещаем заказ в иерархии после указанного элемента
+                if (hierarchyTargetElement != null)
+                {
+                    int targetIndex = hierarchyTargetElement.GetSiblingIndex();
+                    orderRect.SetSiblingIndex(targetIndex + 1);
+                    Debug.Log($"SendZone: Order {order.name} размещен в иерархии после {hierarchyTargetElement.name}");
+                }
+                else
+                {
+                    // Если элемент не указан, размещаем в конце
+                    orderRect.SetAsLastSibling();
+                    Debug.Log($"SendZone: Order {order.name} размещен в конце иерархии");
+                }
+                
+                Debug.Log($"SendZone: Order {order.name} размещен в SendZone, запускаем анимацию завершения");
+                
+                // Запускаем анимацию завершения заказа
+                StartCoroutine(AnimateOrderCompletion(order));
             }
         }
     }
@@ -300,12 +330,90 @@ public class SendZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         }
     }
     
+    // Анимация завершения заказа
+    private System.Collections.IEnumerator AnimateOrderCompletion(Order order)
+    {
+        if (order == null) yield break;
+        
+        RectTransform orderRect = order.GetComponent<RectTransform>();
+        if (orderRect == null) yield break;
+        
+        // Сохраняем начальные значения
+        Vector3 startPosition = orderRect.localPosition;
+        Vector3 startScale = orderRect.localScale;
+        Vector3 startRotation = orderRect.localEulerAngles;
+        
+        // Целевые значения
+        Vector3 targetPosition = startPosition + new Vector3(0f, orderCompleteYOffset, 0f);
+        Vector3 targetScale = orderCompleteFinalScale;
+        Vector3 targetRotation = Vector3.zero;
+        
+        float elapsed = 0f;
+        
+        Debug.Log($"SendZone: Начинаем анимацию завершения заказа {order.name}");
+        Debug.Log($"SendZone: Начальная позиция: {startPosition}, целевая позиция: {targetPosition}");
+        Debug.Log($"SendZone: Начальный масштаб: {startScale}, целевой масштаб: {targetScale}");
+        
+        while (elapsed < orderCompleteAnimationDuration)
+        {
+            float t = elapsed / orderCompleteAnimationDuration;
+            
+            // Используем SmoothStep для более плавной анимации
+            float smoothT = Mathf.SmoothStep(0f, 1f, t);
+            
+            // Анимируем позицию
+            orderRect.localPosition = Vector3.Lerp(startPosition, targetPosition, smoothT);
+            
+            // Анимируем масштаб
+            orderRect.localScale = Vector3.Lerp(startScale, targetScale, smoothT);
+            
+            // Анимируем поворот
+            orderRect.localEulerAngles = Vector3.Lerp(startRotation, targetRotation, smoothT);
+            
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        // Устанавливаем финальные значения
+        orderRect.localPosition = targetPosition;
+        orderRect.localScale = targetScale;
+        orderRect.localEulerAngles = targetRotation;
+        
+        Debug.Log($"SendZone: Анимация завершения заказа {order.name} завершена");
+        
+        // Уничтожаем заказ после анимации
+        // Destroy(order.gameObject);
+        
+        Debug.Log($"SendZone: Заказ {order.name} уничтожен");
+    }
+    
+    // Установить целевой элемент для иерархии
+    public void SetHierarchyTargetElement(Transform target)
+    {
+        hierarchyTargetElement = target;
+        Debug.Log($"SendZone: Установлен целевой элемент иерархии: {(target != null ? target.name : "null")}");
+    }
+    
+    // Получить текущий целевой элемент
+    public Transform GetHierarchyTargetElement()
+    {
+        return hierarchyTargetElement;
+    }
+    
+    // Очистить целевой элемент (заказы будут размещаться в конце)
+    public void ClearHierarchyTargetElement()
+    {
+        hierarchyTargetElement = null;
+        Debug.Log("SendZone: Целевой элемент иерархии очищен");
+    }
+    
     // Метод для получения статистики зоны
     public string GetZoneInfo()
     {
         return $"Зона утилизации: {zoneName}\n" +
                $"Скорость уничтожения: {destroySpeed}\n" +
                $"Подсветка: {(isHighlighted ? "Включена" : "Выключена")}\n" +
-               $"Активна: {isZoneActive}";
+               $"Активна: {isZoneActive}\n" +
+               $"Целевой элемент иерархии: {(hierarchyTargetElement != null ? hierarchyTargetElement.name : "не указан")}";
     }
 } 

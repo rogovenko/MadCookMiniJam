@@ -36,7 +36,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -206.4, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_SizeDelta: {x: 125, y: 125}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6371796824234097864
 CanvasRenderer:
@@ -59,8 +59,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -89,5 +89,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterType: 0
+  characterShape: 0
   customCharacterName: 
-  characterImage: {fileID: 0}
+  currentDefect: 0
+  hasBeenAskedForPapers: 0
+  characterInfo:
+    characterType: 0
+    variety: 0
+    origin: 0
+    name: 
+    expiryMonth: 0
+    expiryDay: 0
+    defects: 
+  bodyImage: {fileID: 0}
+  eyesImage: {fileID: 0}
+  clothesImage: {fileID: 0}
+  defectImage: {fileID: 0}

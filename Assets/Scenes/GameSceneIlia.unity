@@ -516,10 +516,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: EndGame
       objectReference: {fileID: 0}
-    - target: {fileID: 4727059873169485225, guid: 2e664d50c985cc340ba649cd7115ebb6, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 8458511237139069052, guid: 2e664d50c985cc340ba649cd7115ebb6, type: 3}
       propertyPath: gameManager
       value: 
@@ -537,25 +533,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 716204895961608912, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -589.2894
-      objectReference: {fileID: 0}
-    - target: {fileID: 716204895961608912, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -368.01
-      objectReference: {fileID: 0}
     - target: {fileID: 2088951866646490556, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
       propertyPath: m_Name
       value: Canvas
-      objectReference: {fileID: 0}
-    - target: {fileID: 6144517414561576899, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -583.64
-      objectReference: {fileID: 0}
-    - target: {fileID: 6144517414561576899, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 11.525002
       objectReference: {fileID: 0}
     - target: {fileID: 9101548384978308940, guid: 2ab2a90ee1d42e84d8c24135cf899b13, type: 3}
       propertyPath: endGameCanvas

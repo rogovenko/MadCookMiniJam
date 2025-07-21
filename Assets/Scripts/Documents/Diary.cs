@@ -4,43 +4,17 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 
-[System.Serializable]
-public class SpreadData
-{
-    [Header("Левая страница")]
-    [TextArea]
-    public string leftPageText;
-    public Sprite leftPageBackground;
-    
-    [Header("Правая страница")]
-    [TextArea]
-    public string rightPageText;
-    public Sprite rightPageBackground;
-}
-
 public class Diary : Paper
 {
     [Header("Развороты дневника")]
-    [Tooltip("Список разворотов (левая и правая страница)")]
-    public List<SpreadData> spreads = new List<SpreadData>();
+    [Tooltip("Список готовых разворотов (объектов)")]
+    public List<GameObject> spreadObjects = new List<GameObject>();
 
     [Header("UI элементы для листания")]
     [Tooltip("Кнопка/область для листания назад (левый нижний угол)")]
     public Button prevSpreadButton;
     [Tooltip("Кнопка/область для листания вперёд (правый нижний угол)")]
     public Button nextSpreadButton;
-
-    [Header("Левая страница")]
-    [Tooltip("Text для отображения текста левой страницы")]
-    public TextMeshProUGUI paperTextLeft;
-    [Tooltip("Image для отображения фона левой страницы")]
-    public Image pageBackgroundLeft;
-
-    [Header("Правая страница")]
-    [Tooltip("Text для отображения текста правой страницы")]
-    public TextMeshProUGUI paperTextRight;
-    [Tooltip("Image для отображения фона правой страницы")]
-    public Image pageBackgroundRight;
 
     private int currentSpread = 0;
 
@@ -56,28 +30,32 @@ public class Diary : Paper
 
     public void ShowSpread(int spreadIndex)
     {
-        if (spreads == null || spreads.Count == 0) return;
+        if (spreadObjects == null || spreadObjects.Count == 0) return;
         
-        currentSpread = Mathf.Clamp(spreadIndex, 0, spreads.Count - 1);
+        currentSpread = Mathf.Clamp(spreadIndex, 0, spreadObjects.Count - 1);
         
-        // Обновляем левую страницу
-        if (paperTextLeft != null)
-            paperTextLeft.text = spreads[currentSpread].leftPageText;
-        if (pageBackgroundLeft != null)
-            pageBackgroundLeft.sprite = spreads[currentSpread].leftPageBackground;
+        // Отключаем все развороты
+        for (int i = 0; i < spreadObjects.Count; i++)
+        {
+            if (spreadObjects[i] != null)
+            {
+                spreadObjects[i].SetActive(false);
+            }
+        }
         
-        // Обновляем правую страницу
-        if (paperTextRight != null)
-            paperTextRight.text = spreads[currentSpread].rightPageText;
-        if (pageBackgroundRight != null)
-            pageBackgroundRight.sprite = spreads[currentSpread].rightPageBackground;
+        // Включаем только текущий разворот
+        if (spreadObjects[currentSpread] != null)
+        {
+            spreadObjects[currentSpread].SetActive(true);
+            Debug.Log($"Diary: Показан разворот {currentSpread + 1} из {spreadObjects.Count}");
+        }
         
         UpdateButtons();
     }
 
     public void NextSpread()
     {
-        if (currentSpread < spreads.Count - 1)
+        if (currentSpread < spreadObjects.Count - 1)
             ShowSpread(currentSpread + 1);
     }
 
@@ -92,7 +70,7 @@ public class Diary : Paper
         if (prevSpreadButton != null)
             prevSpreadButton.interactable = currentSpread > 0;
         if (nextSpreadButton != null)
-            nextSpreadButton.interactable = currentSpread < spreads.Count - 1;
+            nextSpreadButton.interactable = currentSpread < spreadObjects.Count - 1;
     }
     
     // Получить текущий разворот
@@ -104,18 +82,46 @@ public class Diary : Paper
     // Получить общее количество разворотов
     public int GetTotalSpreads()
     {
-        return spreads.Count;
+        return spreadObjects.Count;
     }
     
     // Проверить, можно ли листать вперед
     public bool CanGoNext()
     {
-        return currentSpread < spreads.Count - 1;
+        return currentSpread < spreadObjects.Count - 1;
     }
     
     // Проверить, можно ли листать назад
     public bool CanGoPrev()
     {
         return currentSpread > 0;
+    }
+    
+    // Получить текущий активный разворот
+    public GameObject GetCurrentSpreadObject()
+    {
+        if (currentSpread >= 0 && currentSpread < spreadObjects.Count)
+        {
+            return spreadObjects[currentSpread];
+        }
+        return null;
+    }
+    
+    // Перейти к конкретному развороту по индексу
+    public void GoToSpread(int index)
+    {
+        ShowSpread(index);
+    }
+    
+    // Перейти к первому развороту
+    public void GoToFirstSpread()
+    {
+        ShowSpread(0);
+    }
+    
+    // Перейти к последнему развороту
+    public void GoToLastSpread()
+    {
+        ShowSpread(spreadObjects.Count - 1);
     }
 } 
