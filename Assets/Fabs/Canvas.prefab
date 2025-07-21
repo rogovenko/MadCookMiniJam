@@ -3667,6 +3667,8 @@ MonoBehaviour:
   recipeManager: {fileID: 4751114390953767534}
   calendar: {fileID: 1289597283781666209}
   handsGame: {fileID: 2552341633045637819}
+  welcomeScreen: {fileID: 0}
+  welcomeScreenButton: {fileID: 0}
   endGameCanvas: {fileID: 0}
   endGameManager: {fileID: 0}
   currentLevel: 0

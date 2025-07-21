@@ -31,6 +31,13 @@ public class GameManager : MonoBehaviour
     [Tooltip("Игра с пальцами")]
     public HandsGame handsGame;
     
+    [Header("Welcome Screen")]
+    [Tooltip("Объект приветственного экрана")]
+    [SerializeField] private GameObject welcomeScreen;
+    
+    [Tooltip("Кнопка для закрытия приветственного экрана")]
+    [SerializeField] private UnityEngine.UI.Button welcomeScreenButton;
+    
     [Header("End Game UI")]
     [Tooltip("Canvas для экрана окончания игры")]
     [SerializeField] private Canvas endGameCanvas;
@@ -255,6 +262,9 @@ public class GameManager : MonoBehaviour
         
         // Обновляем календарь из игровой даты
         UpdateCalendarFromGameDate();
+        
+        // Инициализируем WelcomeScreen
+        InitializeWelcomeScreen();
         
         // Загружаем и запускаем текущий уровень
         LoadAndStartCurrentLevel();
@@ -501,6 +511,124 @@ public class GameManager : MonoBehaviour
     public void SetCalendar(Calendar cal)
     {
         calendar = cal;
+    }
+    
+    // Инициализировать WelcomeScreen
+    private void InitializeWelcomeScreen()
+    {
+        // Проверяем наличие WelcomeScreen
+        if (welcomeScreen == null)
+        {
+            // Ищем WelcomeScreen на сцене
+            GameObject[] allObjects = FindObjectsOfType<GameObject>();
+            foreach (GameObject obj in allObjects)
+            {
+                if (obj.name.Contains("Welcome") || obj.name.Contains("welcome"))
+                {
+                    welcomeScreen = obj;
+                    Debug.Log($"GameManager: Найден WelcomeScreen: {obj.name}");
+                    break;
+                }
+            }
+        }
+        
+        if (welcomeScreen != null)
+        {
+            // Убеждаемся, что WelcomeScreen активен по умолчанию
+            welcomeScreen.SetActive(true);
+            
+            // Ищем кнопку в WelcomeScreen
+            if (welcomeScreenButton == null)
+            {
+                welcomeScreenButton = welcomeScreen.GetComponentInChildren<UnityEngine.UI.Button>();
+                if (welcomeScreenButton == null)
+                {
+                    // Если кнопки нет, создаем её на Image
+                    UnityEngine.UI.Image welcomeImage = welcomeScreen.GetComponent<UnityEngine.UI.Image>();
+                    if (welcomeImage != null)
+                    {
+                        welcomeScreenButton = welcomeScreen.AddComponent<UnityEngine.UI.Button>();
+                        welcomeScreenButton.targetGraphic = welcomeImage;
+                        Debug.Log("GameManager: Создана кнопка для WelcomeScreen");
+                    }
+                }
+            }
+            
+            // Подписываемся на событие клика
+            if (welcomeScreenButton != null)
+            {
+                welcomeScreenButton.onClick.RemoveAllListeners();
+                welcomeScreenButton.onClick.AddListener(OnWelcomeScreenClicked);
+                Debug.Log("GameManager: WelcomeScreen инициализирован и готов к использованию");
+            }
+            else
+            {
+                Debug.LogWarning("GameManager: Не удалось найти или создать кнопку для WelcomeScreen!");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("GameManager: WelcomeScreen не найден на сцене!");
+        }
+    }
+    
+    // Обработчик клика по WelcomeScreen
+    private void OnWelcomeScreenClicked()
+    {
+        Debug.Log("GameManager: WelcomeScreen закрыт пользователем");
+        
+        // Скрываем WelcomeScreen
+        if (welcomeScreen != null)
+        {
+            welcomeScreen.SetActive(false);
+        }
+        
+        // Запускаем таймер
+        if (gameTimer != null)
+        {
+            gameTimer.StartTimer();
+            Debug.Log("GameManager: Таймер запущен после закрытия WelcomeScreen");
+        }
+        else
+        {
+            Debug.LogWarning("GameManager: GameTimer не найден! Не удалось запустить таймер");
+        }
+    }
+    
+    // Показать WelcomeScreen
+    public void ShowWelcomeScreen()
+    {
+        if (welcomeScreen != null)
+        {
+            welcomeScreen.SetActive(true);
+            Debug.Log("GameManager: WelcomeScreen показан");
+        }
+    }
+    
+    // Скрыть WelcomeScreen
+    public void HideWelcomeScreen()
+    {
+        if (welcomeScreen != null)
+        {
+            welcomeScreen.SetActive(false);
+            Debug.Log("GameManager: WelcomeScreen скрыт");
+        }
+    }
+    
+    // Получить WelcomeScreen
+    public GameObject GetWelcomeScreen()
+    {
+        return welcomeScreen;
+    }
+    
+    // Установить WelcomeScreen
+    public void SetWelcomeScreen(GameObject screen)
+    {
+        welcomeScreen = screen;
+        if (welcomeScreen != null)
+        {
+            InitializeWelcomeScreen();
+        }
     }
     
     // Создать очередь на основе подсчитанных овощей
@@ -786,11 +914,8 @@ public class GameManager : MonoBehaviour
                     
                     SetCurrentCharacter(character);
                     
-                    // Запускаем таймер после создания первого персонажа
-                    if (gameTimer != null)
-                    {
-                        gameTimer.StartTimer();
-                    }
+                    // Таймер запускается только после закрытия WelcomeScreen
+                    // Не запускаем таймер здесь
                 }
             }
             else
