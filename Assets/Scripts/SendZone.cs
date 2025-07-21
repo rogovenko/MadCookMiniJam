@@ -381,6 +381,12 @@ public class SendZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         
         Debug.Log($"SendZone: Анимация завершения заказа {order.name} завершена");
         
+        // Воспроизводим звук завершения заказа в конце анимации
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayOrderDone();
+        }
+        
         // Уничтожаем заказ после анимации
         // Destroy(order.gameObject);
         

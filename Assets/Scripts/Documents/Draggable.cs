@@ -73,7 +73,11 @@ public abstract class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler
         // Вычисляем смещение от позиции объекта до позиции мыши
         offset = (Vector2)rectTransform.localPosition - localPoint;
         
-
+        // Воспроизводим звук начала перетаскивания
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayDrag();
+        }
         
         // Увеличиваем размер объекта (если включено)
         if (enableScaleOnDrag)
@@ -114,6 +118,12 @@ public abstract class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler
     {
         // Заканчиваем перетаскивание
         isDragging = false;
+        
+        // Воспроизводим звук окончания перетаскивания
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayDrop();
+        }
         
         // Возвращаем нормальный размер объекта (если было включено увеличение)
         // Но только если объект не находится на полке

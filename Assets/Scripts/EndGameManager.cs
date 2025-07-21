@@ -247,6 +247,12 @@ public class EndGameManager : MonoBehaviour
                 {
                     Debug.Log($"EndGameManager: Осталось пальцев: {remainingFingers}. Переходим на следующий уровень");
                     
+                    // Воспроизводим звук завершения уровня
+                    if (AudioManager.Instance != null)
+                    {
+                        AudioManager.Instance.PlayLevelComplete();
+                    }
+                    
                     // Увеличиваем номер уровня
                     currentLevel++;
                     
@@ -259,6 +265,12 @@ public class EndGameManager : MonoBehaviour
                 else
                 {
                     Debug.Log($"EndGameManager: Достигнут максимальный уровень ({maxLevels})! Показываем экран победы");
+                    
+                    // Воспроизводим звук победы
+                    if (AudioManager.Instance != null)
+                    {
+                        AudioManager.Instance.PlayGameWin();
+                    }
                     
                     // Показываем GameOverScreen с победой
                     ShowGameOverScreen(true); // true = победа (прошли все уровни)
@@ -489,6 +501,19 @@ public class EndGameManager : MonoBehaviour
         {
             Debug.LogError("EndGameManager: GameOverScreen не назначен! Не удалось показать экран Game Over");
             return;
+        }
+        
+        // Воспроизводим соответствующий звук
+        if (AudioManager.Instance != null)
+        {
+            if (isWin)
+            {
+                AudioManager.Instance.PlayGameWin();
+            }
+            else
+            {
+                AudioManager.Instance.PlayGameLose();
+            }
         }
         
         // Устанавливаем сообщение в зависимости от результата
