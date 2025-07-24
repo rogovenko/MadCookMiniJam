@@ -8,6 +8,9 @@ public class TastyButton : MonoBehaviour
     [Tooltip("Image компонент кнопки")]
     [SerializeField] private Image buttonImage;
     
+    [Tooltip("Фон, который включается при активации кнопки")]
+    [SerializeField] private Image backgroundImage;
+    
     [Header("Sprites")]
     [Tooltip("Спрайт активного состояния (CancelUp)")]
     [SerializeField] private Sprite activeSprite;
@@ -27,6 +30,7 @@ public class TastyButton : MonoBehaviour
     [SerializeField] private bool isActivated = true;
     
     private Button button;
+    private GameManager gameManager;
     
     private void Start()
     {
@@ -36,6 +40,13 @@ public class TastyButton : MonoBehaviour
         {
             Debug.LogError("TastyButton: На объекте отсутствует компонент Button!");
             return;
+        }
+        
+        // Находим GameManager
+        gameManager = FindObjectOfType<GameManager>();
+        if (gameManager == null)
+        {
+            Debug.LogWarning($"{nameof(TastyButton)}: GameManager не найден на сцене!");
         }
         
         // Проверяем наличие спрайтов
@@ -49,6 +60,12 @@ public class TastyButton : MonoBehaviour
             Debug.LogWarning("TastyButton: Не назначен неактивный спрайт (CancelDown)!");
         }
         
+        // Скрываем фон до первой инициализации состояния
+        if (backgroundImage != null)
+        {
+            Debug.Log("TastyButton: Скрываем фон");
+            backgroundImage.enabled = false;
+        }
         // Добавляем обработчик клика
         button.onClick.AddListener(OnButtonClick);
         
@@ -58,6 +75,11 @@ public class TastyButton : MonoBehaviour
     
     private void OnButtonClick()
     {
+        if (gameManager.isTutorial)
+        {
+            return;
+        }
+
         // Переключаем состояние
         isActivated = !isActivated;
         UpdateButtonState();
@@ -67,12 +89,18 @@ public class TastyButton : MonoBehaviour
     
     private void UpdateButtonState()
     {
+        Debug.Log("TastyButton: Обновляем состояние кнопки");
         // Обновляем спрайт
         if (buttonImage != null)
         {
             buttonImage.sprite = isActivated ? activeSprite : inactiveSprite;
         }
         
+        // Включаем/выключаем фон
+        if (backgroundImage != null)
+        {
+            backgroundImage.enabled = !isActivated;
+        }
         // Обновляем интерактивность кнопки
         if (button != null)
         {

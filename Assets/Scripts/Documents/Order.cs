@@ -139,6 +139,10 @@ public class Order : Paper
     // Добавить наклейку
     public void AddSticker(CharacterType vegetableType)
     {
+        if(gameManager.isTutorial)
+        {
+            gameManager.tutorial.NextStep();
+        }
         // Находим первый пустой слот
         StickerSlot emptySlot = FindEmptyStickerSlot();
         

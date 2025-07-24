@@ -78,6 +78,12 @@ public class GameManager : MonoBehaviour
     
     [Tooltip("Режим выбора заказа")]
     [SerializeField] private bool chooseOrderMode = false;
+
+    [Tooltip("Ссылка на Tutorial (объект туториала)")]
+    public Tutorial tutorial;
+
+    [Tooltip("Режим обучения (tutorial)")]
+    [SerializeField] public bool isTutorial = false;
     
     [Header("Текущий персонаж")]
     [Tooltip("Текущий активный персонаж")]
@@ -309,6 +315,21 @@ public class GameManager : MonoBehaviour
             DefineQueue();
             CreateQueue();
             InitRecipes();
+        }
+        
+        // Запускаем таймер
+        if (gameTimer != null)
+        {
+            if (isTutorial)
+            {
+                return;
+            }
+            gameTimer.StartTimer();
+            Debug.Log("GameManager: Таймер запущен в LoadAndStartCurrentLevel");
+        }
+        else
+        {
+            Debug.LogWarning("GameManager: GameTimer не найден! Не удалось запустить таймер в LoadAndStartCurrentLevel");
         }
     }
 
@@ -586,6 +607,10 @@ public class GameManager : MonoBehaviour
         // Запускаем таймер
         if (gameTimer != null)
         {
+            if (isTutorial)
+            {
+                return;
+            }
             gameTimer.StartTimer();
             Debug.Log("GameManager: Таймер запущен после закрытия WelcomeScreen");
         }
@@ -717,6 +742,12 @@ public class GameManager : MonoBehaviour
         ShuffleList(queueCharacters);
         
         // Сохраняем очередь для использования в CreateQueue()
+        // Если режим туториала, добавляем картофель без ошибок и дефектов в начало очереди
+        if (isTutorial)
+        {
+            CharInfo tutorialPotato = new CharInfo(CharacterType.Potato, false, false, currentDate);
+            queueCharacters.Insert(0, tutorialPotato);
+        }
         initialQueue = queueCharacters;
         
         Debug.Log($"GameManager: Создана очередь из {queueCharacters.Count} персонажей:");
@@ -973,12 +1004,37 @@ public class GameManager : MonoBehaviour
     // Действие "Trash" - отклонить персонажа
     public void TrashAction()
     {
-        DestroyCurrentCharacter();
+
+        if (isTutorial)
+        {
+            return;
+        }
+
+        if (!tastyButton.IsActivated())
+        {
+            Debug.Log("GameManager: Кнопка Tasty не активна, не уничтожаем персонажа");
+        }
+        else
+        {
+            DestroyCurrentCharacter();
+        }
     }
     
     // Действие "Tasty" - принять персонажа
     public void TastyAction()
     {
+        if (isTutorial)
+        {
+            if(tutorial.TutorialStep == 6)
+            {
+                tutorial.NextStep();
+                chooseOrderMode = !chooseOrderMode;
+                dragEventSystem.DisableDragDrop();
+                tastyButton.MakeInactive();
+            }
+            return;
+        }
+
         // Переключаем режим выбора заказа
         chooseOrderMode = !chooseOrderMode;
         
@@ -1001,6 +1057,17 @@ public class GameManager : MonoBehaviour
     // "Раздеть" текущего персонажа
     public void StripCurrentCharacter()
     {
+        if (isTutorial)
+        {
+            return;
+        }
+
+        if (tastyButton.IsActivated())
+        {
+            Debug.Log("GameManager: Кнопка Tasty не активна, не разделяем персонажа");
+            return;
+        }
+
         if (currentCharacter != null)
         {
             Character characterComponent = currentCharacter.GetComponent<Character>();
@@ -1022,8 +1089,23 @@ public class GameManager : MonoBehaviour
     // Запустить спавн бумаг
     public void PapersPlease()
     {
+        if (isTutorial && tutorial.TutorialStep != 4)
+        {
+            return;
+        }
+
+        // if (tastyButton.IsActivated())
+        // {
+        //     Debug.Log("GameManager: Кнопка Tasty не активна, не запрашиваем бумажки");
+        //     return;
+        // }
+
         if (currentCharacter != null)
         {
+            if(tutorial.TutorialStep == 4)
+            {
+                tutorial.NextStep();
+            }
             Character characterComponent = currentCharacter.GetComponent<Character>();
             if (characterComponent != null)
             {

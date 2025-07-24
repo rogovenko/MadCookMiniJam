@@ -55,12 +55,26 @@ public class Diary : Paper
 
     public void NextSpread()
     {
+        if (gameManager.isTutorial)
+        {
+            if(gameManager.tutorial.TutorialStep == 2)
+            {
+                ShowSpread(currentSpread + 1);
+                gameManager.tutorial.NextStep();
+            }
+            return;
+        }
+
         if (currentSpread < spreadObjects.Count - 1)
             ShowSpread(currentSpread + 1);
     }
 
     public void PrevSpread()
     {
+        if (gameManager.isTutorial)
+        {
+            return;
+        }
         if (currentSpread > 0)
             ShowSpread(currentSpread - 1);
     }

@@ -420,6 +420,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WelcomeScreen
       objectReference: {fileID: 0}
+    - target: {fileID: 690656936893860625, guid: f543ad994253d7e41881c64d7ffcb943, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3955234310821848019, guid: f543ad994253d7e41881c64d7ffcb943, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -616,6 +620,14 @@ PrefabInstance:
     - target: {fileID: 4727059873169485225, guid: 2e664d50c985cc340ba649cd7115ebb6, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8198954688271112332, guid: 2e664d50c985cc340ba649cd7115ebb6, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8198954688271112332, guid: 2e664d50c985cc340ba649cd7115ebb6, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8458511237139069052, guid: 2e664d50c985cc340ba649cd7115ebb6, type: 3}
       propertyPath: gameManager

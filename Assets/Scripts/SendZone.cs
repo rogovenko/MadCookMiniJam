@@ -39,6 +39,10 @@ public class SendZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     [Tooltip("Элемент после которого размещать заказ в иерархии")]
     [SerializeField] private Transform hierarchyTargetElement;
     
+    [Header("Включить отправку заказов")]
+    [Tooltip("Если true — зона отправляет заказы, если false — возвращает всё на полку")]
+    [SerializeField] private bool isSendOrder = true;
+    
     private UnityEngine.UI.Image zoneImage;
     private Color originalColor;
     private bool isHighlighted = false;
@@ -180,26 +184,43 @@ public class SendZone : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         {
             // Проверяем, является ли это Order
             Order order = paper.GetComponent<Order>();
-            if (order != null)
+            if (isSendOrder)
             {
-                // Если это Order - размещаем его в SendZone
-                Debug.Log("SendZone: Размещаем Order в SendZone");
-                CompleteOrder(order);
-                gameManager.CheckOrder(order);
+                if (order != null)
+                {
+                    // Если это Order - размещаем его в SendZone
+                    Debug.Log("SendZone: Размещаем Order в SendZone");
+                    CompleteOrder(order);
+                    gameManager.CheckOrder(order);
+                }
+                else
+                {
+                    // Если это не Order - проверяем, откуда был взят объект
+                    if (WasObjectFromShelfZone(draggable))
+                    {
+                        // Если объект был взят из ShelfZone - возвращаем его туда
+                        Debug.Log("SendZone: Возвращаем объект обратно в ShelfZone");
+                        ReturnToShelfZone(draggable);
+                    }
+                    else
+                    {
+                        // Если объект был взят из другого места - возвращаем в исходную позицию
+                        Debug.Log("SendZone: Возвращаем объект в исходную позицию");
+                        ReturnToOriginalPosition(draggable);
+                    }
+                }
             }
             else
             {
-                // Если это не Order - проверяем, откуда был взят объект
+                // Если isSendOrder == false, любые объекты (включая Order) возвращаем на полку или в исходную позицию
                 if (WasObjectFromShelfZone(draggable))
                 {
-                    // Если объект был взят из ShelfZone - возвращаем его туда
-                    Debug.Log("SendZone: Возвращаем объект обратно в ShelfZone");
+                    Debug.Log("SendZone: isSendOrder == false, возвращаем объект на полку");
                     ReturnToShelfZone(draggable);
                 }
                 else
                 {
-                    // Если объект был взят из другого места - возвращаем в исходную позицию
-                    Debug.Log("SendZone: Возвращаем объект в исходную позицию");
+                    Debug.Log("SendZone: isSendOrder == false, возвращаем объект в исходную позицию");
                     ReturnToOriginalPosition(draggable);
                 }
             }
