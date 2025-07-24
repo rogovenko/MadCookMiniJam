@@ -94,10 +94,11 @@ MonoBehaviour:
   enableScaleOnDrag: 1
   dragScaleMultiplier: 1.1
   scaleSpeed: 5
-  enableAlphaOnDrag: 1
-  dragAlpha: 0.8
+  dragInsertBeforeName: DocsBefore
   paperImage: {fileID: 5720056437819706335}
   paperText: {fileID: 827542456370630019}
+  bodyImage: {fileID: 0}
+  eyesImage: {fileID: 0}
   paperContent: Sample Document
   enableRandomRotation: 1
   maxRotationAngle: 15

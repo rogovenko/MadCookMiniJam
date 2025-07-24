@@ -28,7 +28,7 @@ public class EndGameManager : MonoBehaviour
     
     [Header("Управление уровнями")]
     [Tooltip("Текущий уровень")]
-    [SerializeField] private int currentLevel = 1;
+    [SerializeField] private int currentLevel = 0;
     [Tooltip("Максимальное количество уровней")]
     [SerializeField] private int maxLevels = 5;
     
@@ -256,6 +256,7 @@ public class EndGameManager : MonoBehaviour
                     // Увеличиваем номер уровня
                     currentLevel++;
                     
+                    Debug.Log("EndGameManager: Переходим на следующий уровень");
                     // Переходим на следующий уровень через GameManager
                     gameManager.NextLevel();
                     

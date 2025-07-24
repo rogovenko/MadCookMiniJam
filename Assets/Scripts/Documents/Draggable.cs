@@ -13,6 +13,11 @@ public abstract class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler
     [Tooltip("Скорость изменения размера (чем больше, тем быстрее)")]
     [SerializeField] protected float scaleSpeed = 5f;
     
+    [Tooltip("Имя элемента, перед которым нужно ставить объект при перетаскивании (оставьте пустым, если не нужно)")]
+    [SerializeField] protected string dragInsertBeforeName;
+    
+    protected Transform dragInsertBefore;
+    
     protected bool isDragging = false;
     protected Vector2 offset;
     protected Canvas canvas;
@@ -25,12 +30,21 @@ public abstract class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler
     protected Vector3 dragStartScale; // Масштаб в момент начала перетаскивания
     protected Vector2 originalSize;
     protected bool wasOnShelfAtDragStart; // Был ли объект на полке в момент начала перетаскивания
+
+    protected GameManager gameManager; // Ссылка на GameManager
     
     protected virtual void Start()
     {
         canvas = GetComponentInParent<Canvas>();
         rectTransform = GetComponent<RectTransform>();
         canvasGroup = GetComponent<CanvasGroup>();
+        
+        // Находим GameManager
+        gameManager = FindObjectOfType<GameManager>();
+        if (gameManager == null)
+        {
+            Debug.LogWarning($"{nameof(Draggable)}: GameManager не найден на сцене!");
+        }
         
         // Если нет CanvasGroup, создаем его
         if (canvasGroup == null)
@@ -43,10 +57,34 @@ public abstract class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler
         originalPosition = rectTransform.localPosition;
         originalSize = rectTransform.sizeDelta;
         targetScale = originalScale;
+        
+        // Ищем элемент с нужным именем среди детей родителя
+        if (!string.IsNullOrEmpty(dragInsertBeforeName) && rectTransform.parent != null)
+        {
+            foreach (Transform child in rectTransform.parent)
+            {
+                if (child.name == dragInsertBeforeName)
+                {
+                    dragInsertBefore = child;
+                    break;
+                }
+            }
+        }
+        // Если нашли dragInsertBefore, размещаем объект перед ним (targetIndex - 1)
+        if (dragInsertBefore != null && rectTransform.parent == dragInsertBefore.parent)
+        {
+            int targetIndex = dragInsertBefore.GetSiblingIndex();
+            rectTransform.SetSiblingIndex(targetIndex - 1);
+        }
     }
     
     public virtual void OnBeginDrag(PointerEventData eventData)
     {
+        if (gameManager.isTutorial)
+        {
+            return;
+        }
+
         // Проверяем, включен ли drag'n'drop глобально
         if (DragEventSystem.Instance != null && !DragEventSystem.Instance.IsDragDropEnabled())
         {
@@ -83,6 +121,13 @@ public abstract class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler
         if (enableScaleOnDrag)
         {
             targetScale = originalScale * dragScaleMultiplier;
+        }
+        
+        // Перемещаем объект в иерархии перед найденным элементом, если он найден
+        if (dragInsertBefore != null && rectTransform.parent == dragInsertBefore.parent)
+        {
+            int targetIndex = dragInsertBefore.GetSiblingIndex();
+            rectTransform.SetSiblingIndex(targetIndex - 1);
         }
         
         // Уведомляем систему событий
