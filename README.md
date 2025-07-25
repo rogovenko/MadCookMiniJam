@@ -1,6 +1,6 @@
 ﻿# Finger Licking Good
 Game, made at Mini Jam 189: Cooking, game jam competition that occurs every two weeks on Itch.io</br>
-Results is to be announced soon.</br>
+Ranked 29 out of 92 entries.</br>
 It was made in three days</br>
 July, 2025.
 
